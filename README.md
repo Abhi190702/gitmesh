@@ -52,6 +52,52 @@ Before joining the pack, ensure you have:
   - Verify installation: `echo $PATH` (look for `/usr/local/bin`)
 - **Docker & Docker Compose** – [Installation guide](https://docs.docker.com/get-docker/)
 - **Git** – [Git Download](https://git-scm.com/downloads)
+- **Ollama** *(optional, for local AI features)* – [Download here](https://ollama.com/download)
+
+### Ollama Setup (Optional — Local AI)
+
+GitMesh uses Ollama for local AI-powered features (issue prioritization, sprint suggestions, spec generation). Ollama runs **on your host system** (not in Docker) for better performance and GPU support.
+
+<details>
+<summary><strong>Install & Configure Ollama</strong></summary>
+
+**1. Install Ollama on your host:**
+
+```bash
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Or download from https://ollama.com/download
+```
+
+**2. Pull a model:**
+
+```bash
+ollama pull llama3.2:3b
+```
+
+**3. Verify it's running:**
+
+```bash
+curl http://localhost:11434
+# Should return: "Ollama is running"
+```
+
+**4. Enable Ollama in GitMesh:**
+
+Add these environment variables to your backend override file (`backend/.env.override.local` or `backend/.env.override.composed`):
+
+```bash
+OLLAMA_ENABLED=true
+OLLAMA_URL=http://host.docker.internal:11434
+OLLAMA_MODEL=llama3.2:3b
+```
+
+> **Linux Docker users:** If `host.docker.internal` doesn't resolve, add `--add-host=host.docker.internal:host-gateway` to your Docker run command, or use your host's LAN IP (e.g., `http://192.168.1.x:11434`).
+
+**Without Ollama:** GitMesh works perfectly fine without it. If no AI provider is configured, workflow endpoints return deterministic fallback responses. You can also use cloud providers (OpenAI, Anthropic, Groq, etc.) by setting their API keys.
+
+</details>
 
 ### Launch Sequence
 
