@@ -1,7 +1,7 @@
 """
 DevTel AI Service
 Multi-provider AI service supporting latest models (2024/2025):
-- Ollama (development - local)
+- Ollama (development - runs on host system, not in Docker)
 - OpenAI: GPT-4o, GPT-4o-mini, o1-preview
 - Anthropic: Claude 3.5 Sonnet/Haiku
 - Google: Gemini 2.0 Flash, 1.5 Pro
@@ -37,9 +37,11 @@ app.add_middleware(
 SERVICE_TOKEN = os.getenv("CREWAI_SERVICE_TOKEN", "dev-token")
 AI_PROVIDER = os.getenv("AI_PROVIDER", "auto")
 
-# Ollama (local LLM)
-OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "true").lower() == "true"
-OLLAMA_URL = os.getenv("OLLAMA_URL", "http://ollama:11434")
+# Ollama (local LLM - runs on host system, not in Docker)
+# Install Ollama on your host: https://ollama.com/download
+# Then pull a model: ollama pull llama3.2:3b
+OLLAMA_ENABLED = os.getenv("OLLAMA_ENABLED", "false").lower() == "true"
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://host.docker.internal:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2:3b")
 
 # Cloud providers
@@ -280,7 +282,7 @@ def get_active_provider() -> str:
     if AI_PROVIDER != "auto":
         return AI_PROVIDER
     
-    # Auto-detect: prefer cloud providers, fallback to Ollama
+    # Auto-detect: prefer cloud providers, fallback to Ollama if enabled
     if OPENAI_API_KEY:
         return "openai"
     if ANTHROPIC_API_KEY:
@@ -296,8 +298,8 @@ def get_active_provider() -> str:
     if OLLAMA_ENABLED:
         return "ollama"
     
-    # Ultimate fallback
-    return "ollama"
+    # No provider configured — workflows will use deterministic fallbacks
+    return "none"
 
 
 ACTIVE_PROVIDER = get_active_provider()
@@ -319,8 +321,12 @@ def get_ai_client() -> AIClient:
         return TogetherClient(TOGETHER_API_KEY, TOGETHER_MODEL)
     elif provider == "deepseek":
         return DeepSeekClient(DEEPSEEK_API_KEY, DEEPSEEK_MODEL)
-    else:
+    elif provider == "ollama":
         return OllamaClient(OLLAMA_URL, OLLAMA_MODEL)
+    else:
+        # No provider configured — return a no-op client
+        # Workflow endpoints will use their deterministic fallbacks
+        return AIClient()
 
 
 ai_client = get_ai_client()
@@ -366,11 +372,12 @@ async def health_check():
         "together": TOGETHER_MODEL,
         "deepseek": DEEPSEEK_MODEL,
     }
-    status["model"] = model_map.get(ACTIVE_PROVIDER, "unknown")
+    status["model"] = model_map.get(ACTIVE_PROVIDER, "none (using fallback responses)")
     
     if OLLAMA_ENABLED and ACTIVE_PROVIDER == "ollama":
         ollama = OllamaClient(OLLAMA_URL, OLLAMA_MODEL)
         status["ollama_connected"] = await ollama.is_available()
+        status["ollama_url"] = OLLAMA_URL
     
     return status
 

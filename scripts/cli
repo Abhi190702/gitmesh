@@ -629,7 +629,9 @@ function check_container_health() {
     
     if [[ "$status" == "running" ]]; then
         # Check health status if available
-        local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id" 2>/dev/null || echo "none")
+        local health_status
+        health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id" 2>/dev/null) || health_status="none"
+        health_status=$(echo "$health_status" | tr -d '[:space:]')
         [[ -z "$health_status" ]] && health_status="none"
         
         if [[ "$health_status" == "healthy" ]]; then
@@ -673,7 +675,10 @@ function check_application_service_health() {
     
     if [[ "$status" == "running" ]]; then
         # Check health status if available
-        local health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id" 2>/dev/null || echo "none")
+        local health_status
+        health_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id" 2>/dev/null) || health_status="none"
+        health_status=$(echo "$health_status" | tr -d '[:space:]')
+        [[ -z "$health_status" ]] && health_status="none"
         
         if [[ "$health_status" == "healthy" ]]; then
             echo "${GREEN}healthy${RESET}"
@@ -913,11 +918,12 @@ function print_success_and_ports() {
     [[ "$sqs_status" == *"unhealthy"* ]] && ((unhealthy_count++))
     [[ "$sqs_status" != *"not running"* ]] && ((total_services++))
     
-    # Check Ollama - has HTTP endpoint
-    local ollama_status=$(check_http_service_health "ollama" "http://localhost:11434")
-    echo -e "${BLUE}Ollama:${RESET}               http://localhost:11434 - $ollama_status"
-    [[ "$ollama_status" == *"unhealthy"* ]] && ((unhealthy_count++))
-    [[ "$ollama_status" != *"not running"* ]] && ((total_services++))
+    # Check Ollama (host system) - optional, not managed by Docker
+    if curl -sf http://localhost:11434 > /dev/null 2>&1; then
+        echo -e "${BLUE}Ollama (host):${RESET}        http://localhost:11434 - ${GREEN}✓ running${RESET}"
+    else
+        echo -e "${BLUE}Ollama (host):${RESET}        http://localhost:11434 - ${GREY}not running (optional)${RESET}"
+    fi
     
     # Check Unleash (only for EE) - has HTTP endpoint
     if [[ "$__EDITION" == "gitmesh-ee" ]]; then
