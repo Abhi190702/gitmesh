@@ -9,9 +9,6 @@ import { fromJSON, toJSON } from './utils/payload'
 
 const config: Config = {
   envvars: ['TEMPORAL_ENCRYPTION_KEY_ID', 'TEMPORAL_ENCRYPTION_KEY'],
-  producer: {
-    enabled: false,
-  },
   temporal: {
     enabled: false,
   },

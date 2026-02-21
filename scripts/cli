@@ -900,12 +900,6 @@ function print_success_and_ports() {
     [[ "$temporal_status" == *"unhealthy"* ]] && ((unhealthy_count++))
     [[ "$temporal_status" != *"not running"* ]] && ((total_services++))
     
-    # Check Kafka - has built-in health check
-    local kafka_status=$(check_container_health "${PROJECT_NAME}.*kafka")
-    echo -e "${BLUE}Kafka:${RESET}                http://localhost:9094 - $kafka_status"
-    [[ "$kafka_status" == *"unhealthy"* ]] && ((unhealthy_count++))
-    [[ "$kafka_status" != *"not running"* ]] && ((total_services++))
-    
     # Check OpenSearch - has HTTP health endpoint
     local opensearch_status=$(check_http_service_health "open-search" "http://localhost:9200/_cluster/health")
     echo -e "${BLUE}OpenSearch:${RESET}           http://localhost:9200 - $opensearch_status"

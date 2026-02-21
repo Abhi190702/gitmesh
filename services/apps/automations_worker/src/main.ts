@@ -3,9 +3,6 @@ import { ServiceWorker, Options } from '@gitmesh/archetype-worker'
 
 const config: Config = {
   envvars: [],
-  producer: {
-    enabled: false,
-  },
   temporal: {
     enabled: false,
   },

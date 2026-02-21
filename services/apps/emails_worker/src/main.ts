@@ -19,9 +19,6 @@ const config: Config = {
     'BREVO_NAME_FROM',
     'BREVO_EMAIL_FROM',
   ],
-  producer: {
-    enabled: false,
-  },
   temporal: {
     enabled: true,
   },

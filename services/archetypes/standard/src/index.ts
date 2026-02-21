@@ -1,5 +1,3 @@
-import { Kafka, Producer as KafkaProducer } from 'kafkajs'
-
 import { IIntegrationDescriptor, INTEGRATION_SERVICES } from '@gitmesh/integrations'
 import { getServiceLogger, Logger } from '@gitmesh/logging'
 import { acquireLock, getRedisClient, RedisClient, releaseLock } from '@gitmesh/redis'
@@ -14,7 +12,6 @@ const logger = getServiceLogger()
 // List all required environment variables, grouped per "component".
 const envvars = {
   base: ['SERVICE'],
-  producer: ['KAFKA_BROKERS'],
   temporal: ['TEMPORAL_SERVER_URL', 'TEMPORAL_NAMESPACE'],
   redis: ['REDIS_HOST', 'REDIS_PORT', 'REDIS_USERNAME', 'REDIS_PASSWORD'],
 }
@@ -25,17 +22,6 @@ Config is used to configure the service.
 export interface Config {
   // Additional environment variables required by the service to properly run.
   envvars?: string[]
-
-  // Enable and configure the Kafka producer, if needed.
-  producer: {
-    enabled: boolean
-    idempotent?: boolean
-    retryPolicy?: {
-      initialRetryTime: number
-      maxRetryTime: number
-      retries: number
-    }
-  }
 
   // Enable and configure the Temporal client, if needed.
   temporal: {
@@ -60,7 +46,6 @@ export class Service {
 
   protected _unleash?: UnleashClient
 
-  protected _kafka: Kafka | null
   protected _temporal: TemporalClient | null
 
   protected _redisClient: RedisClient | null
@@ -71,32 +56,10 @@ export class Service {
     this.log = logger
     this.config = config
     this.integrations = INTEGRATION_SERVICES
-
-    // TODO: Handle SSL and SASL configuration.
-    if (config.producer.enabled && process.env['KAFKA_BROKERS']) {
-      const brokers = process.env['KAFKA_BROKERS']
-      this._kafka = new Kafka({
-        clientId: this.name,
-        brokers: brokers.split(','),
-        // sasl
-        // ssl
-      })
-    }
   }
 
   get unleash(): UnleashClient | undefined {
     return this._unleash
-  }
-
-  get producer(): KafkaProducer | null {
-    if (!this.config.producer.enabled) {
-      return null
-    }
-
-    return this._kafka.producer({
-      idempotent: this.config.producer.idempotent,
-      retry: this.config.producer.retryPolicy,
-    })
   }
 
   get temporal(): TemporalClient | null {
@@ -157,15 +120,6 @@ export class Service {
       })
     }
 
-    // Only validate Kafka-related environment variables if enabled.
-    if (this.config.producer.enabled) {
-      envvars.producer.forEach((envvar) => {
-        if (!process.env[envvar]) {
-          missing.push(envvar)
-        }
-      })
-    }
-
     // Only validate Temporal-related environment variables if enabled.
     if (this.config.temporal.enabled) {
       envvars.temporal.forEach((envvar) => {
@@ -211,14 +165,6 @@ export class Service {
       })
     }
 
-    if (this.config.producer.enabled) {
-      try {
-        await this.producer.connect()
-      } catch (err) {
-        throw new Error(err)
-      }
-    }
-
     if (this.config.temporal.enabled) {
       try {
         this._temporal = await getTemporalClient({
@@ -249,10 +195,6 @@ export class Service {
 
   // Stop allows to gracefully stop the service.
   protected async stop() {
-    if (this.config.producer.enabled) {
-      await this.producer.disconnect()
-    }
-
     if (this.config.temporal.enabled) {
       await this.temporal.connection.close()
     }
