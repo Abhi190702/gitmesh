@@ -32,7 +32,6 @@
     "@opentelemetry/resources": "~1.17.0",
     "@opentelemetry/sdk-node": "~0.43.0",
     "@opentelemetry/semantic-conventions": "~1.17.0",
-    "opentelemetry-instrumentation-kafkajs": "~0.39.1",
     "opentelemetry-instrumentation-sequelize": "~0.39.1"
   }
 }
