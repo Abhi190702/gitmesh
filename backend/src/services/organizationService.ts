@@ -741,43 +741,7 @@ export default class OrganizationService extends LoggerBase {
     const limit = data.limit
     const offset = data.offset
 
-    // PERMANENT FIX: Always check for manually created organizations first
-    const manualOrgsCheck = await this.options.database.sequelize.query(
-      `SELECT COUNT(*) as count FROM organizations 
-       WHERE "tenantId" = :tenantId 
-       AND "deletedAt" IS NULL 
-       AND "manuallyCreated" = true`,
-      {
-        replacements: { tenantId: this.options.currentTenant.id },
-        type: this.options.database.Sequelize.QueryTypes.SELECT,
-      }
-    )
-    
-    // ALWAYS use database query when manual organizations exist - ensures instant visibility
-    const hasManualOrganizations = manualOrgsCheck[0]?.count > 0
-    
-    if (hasManualOrganizations) {
-      this.log.info(
-        { manualOrganizationsCount: manualOrgsCheck[0].count }, 
-        'Manual organizations detected - using database query for guaranteed visibility'
-      )
-    }
-    
-    // Try OpenSearch only if no manual organizations exist
-    if (!hasManualOrganizations) {
-      try {
-        const result = await OrganizationRepository.findAndCountAllOpensearch(
-          { filter: advancedFilter, orderBy, limit, offset, segments: data.segments },
-          this.options,
-        )
-        
-        return result
-      } catch (searchError) {
-        this.log.warn(searchError, 'OpenSearch query failed, falling back to database query')
-      }
-    }
-    
-    // PERMANENT DATABASE FALLBACK with proper count handling
+    // Database query with proper count handling
     this.log.info({ filter: advancedFilter, limit, offset }, 'Using database query')
     
     const result = await OrganizationRepository.findAndCountAll(

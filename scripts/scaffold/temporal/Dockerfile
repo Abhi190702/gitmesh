@@ -1,7 +1,7 @@
 FROM alpine:latest
 
-RUN apk add curl
-RUN curl -sSf https://temporal.download/cli.sh | sh
+RUN apk add --no-cache curl \
+    && curl -sSf https://temporal.download/cli.sh | sh
 
 ENV PATH /root/.temporalio/bin:$PATH
 

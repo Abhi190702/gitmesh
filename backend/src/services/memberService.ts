@@ -1144,51 +1144,7 @@ export default class MemberService extends LoggerBase {
       await MemberAttributeSettingsRepository.findAndCountAll({}, this.options)
     ).rows
 
-    // PERMANENT FIX: Always check for manually created members first
-    const manualMembersCheck = await this.options.database.sequelize.query(
-      `SELECT COUNT(*) as count FROM members 
-       WHERE "tenantId" = :tenantId 
-       AND "deletedAt" IS NULL 
-       AND "manuallyCreated" = true`,
-      {
-        replacements: { tenantId: this.options.currentTenant.id },
-        type: this.options.database.Sequelize.QueryTypes.SELECT,
-      }
-    )
-    
-    // ALWAYS use database query when manual members exist - ensures instant visibility
-    const hasManualMembers = manualMembersCheck[0]?.count > 0
-    
-    if (hasManualMembers) {
-      logger.info(
-        { manualMembersCount: manualMembersCheck[0].count }, 
-        'Manual members detected - using database query for guaranteed visibility'
-      )
-    }
-    
-    // Try OpenSearch only if no manual members exist
-    if (!hasManualMembers) {
-      try {
-        const result = await MemberRepository.findAndCountAllOpensearch(
-          {
-            limit: data.limit,
-            offset: data.offset,
-            filter: data.filter,
-            orderBy: data.orderBy || undefined,
-            countOnly: data.countOnly || false,
-            attributesSettings: memberAttributeSettings,
-            segments: data.segments,
-          },
-          this.options,
-        )
-        
-        return result
-      } catch (error) {
-        logger.warn(error, 'OpenSearch query failed, falling back to database query')
-      }
-    }
-    
-    // PERMANENT DATABASE FALLBACK with proper count handling
+    // Database query with proper count handling
     logger.info({ segments: data.segments, filter: data.filter, limit: data.limit, offset: data.offset }, 'Using database query')
     
     // Fetch segment objects for the options

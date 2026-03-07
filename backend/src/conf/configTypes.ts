@@ -226,13 +226,6 @@ export interface WeeklyEmailsConfiguration {
   enabled: string // true - enabled, anything else - disabled
 }
 
-export interface IOpenSearchConfig {
-  node: string
-  region?: string
-  accessKeyId?: string
-  secretAccessKey?: string
-}
-
 export interface GitmeshAnalyticsConfiguration {
   isEnabled: string
   tenantId: string

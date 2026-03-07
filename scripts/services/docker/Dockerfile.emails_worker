@@ -1,19 +1,5 @@
-FROM node:20-alpine
-
-WORKDIR /usr/gitmesh/app
-
-# Install bash and build dependencies
-RUN apk add --update --no-cache bash python3 build-base
-
-RUN npm install -g pnpm
-
-# Set CI environment variable for pnpm
-ENV CI=true
-
-COPY ./services/scripts ./services/scripts
-COPY ./services/archetypes/ ./services/archetypes/
-COPY ./services/libs/ ./services/libs/
-RUN cd services/scripts && ./install_lib_packages.sh
+ARG BASE_IMAGE=gitmesh-node-base:latest
+FROM ${BASE_IMAGE}
 
 COPY ./services/apps/emails_worker/package.json ./services/apps/emails_worker/pnpm-lock.yaml ./services/apps/emails_worker/tsconfig.json  ./services/apps/emails_worker/
 # COPY ./services/apps/emails_worker/config ./services/apps/emails_worker/config

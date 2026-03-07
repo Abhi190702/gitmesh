@@ -900,12 +900,6 @@ function print_success_and_ports() {
     [[ "$temporal_status" == *"unhealthy"* ]] && ((unhealthy_count++))
     [[ "$temporal_status" != *"not running"* ]] && ((total_services++))
     
-    # Check OpenSearch - has HTTP health endpoint
-    local opensearch_status=$(check_http_service_health "open-search" "http://localhost:9200/_cluster/health")
-    echo -e "${BLUE}OpenSearch:${RESET}           http://localhost:9200 - $opensearch_status"
-    [[ "$opensearch_status" == *"unhealthy"* ]] && ((unhealthy_count++))
-    [[ "$opensearch_status" != *"not running"* ]] && ((total_services++))
-    
     # Check SQS UI - has HTTP endpoint
     local sqs_status=$(check_http_service_health "sqs" "http://localhost:9325")
     echo -e "${BLUE}SQS UI:${RESET}               http://localhost:9325 - $sqs_status"
@@ -944,6 +938,10 @@ function print_success_and_ports() {
 }
 
 function start() {
+    # Build shared base image for all Node.js services (cached if unchanged)
+    say "Building shared Node.js base image..."
+    docker build -t gitmesh-node-base:latest -f "$CLI_HOME/services/docker/Dockerfile.node-base" "$CLI_HOME/.." 2>&1 | tail -1
+
     if [[ -z "$CLEAN_START" ]]; then
         up_scaffold
         post_up_scaffold

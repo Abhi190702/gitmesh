@@ -1,15 +1,5 @@
-FROM node:20-alpine
-
-# Install bash and build dependencies
-RUN apk add --update --no-cache bash python3 build-base
-
-WORKDIR /usr/gitmesh/app
-
-RUN npm install -g pnpm
-
-COPY ./services/scripts ./services/scripts
-COPY ./services/libs/ ./services/libs/
-RUN cd services/scripts && ./install_lib_packages.sh
+ARG BASE_IMAGE=gitmesh-node-base:latest
+FROM ${BASE_IMAGE}
 
 COPY ./services/apps/integration_sync_worker/package.json ./services/apps/integration_sync_worker/pnpm-lock.yaml ./services/apps/integration_sync_worker/tsconfig.json  ./services/apps/integration_sync_worker/
 COPY ./services/apps/integration_sync_worker/config ./services/apps/integration_sync_worker/config

@@ -1,7 +1,6 @@
 import { SERVICE } from '@gitmesh/common'
 import { getUnleashClient } from '@gitmesh/feature-flags'
 import { getServiceLogger } from '@gitmesh/logging'
-import { getOpensearchClient } from '@gitmesh/opensearch'
 import { getRedisClient, getRedisPubSubPair, RedisPubSubReceiver } from '@gitmesh/redis'
 import { getServiceTracer } from '@gitmesh/tracing'
 import { ApiWebsocketMessage, Edition } from '@gitmesh/types'
@@ -15,7 +14,6 @@ import { getTemporalClient, Client as TemporalClient } from '@gitmesh/temporal'
 import { QueryTypes, Sequelize } from 'sequelize'
 import {
   API_CONFIG,
-  OPENSEARCH_CONFIG,
   REDIS_CONFIG,
   TEMPORAL_CONFIG,
   UNLEASH_CONFIG,
@@ -24,7 +22,6 @@ import { authMiddleware } from '../middlewares/authMiddleware'
 import { databaseMiddleware } from '../middlewares/databaseMiddleware'
 import { errorMiddleware } from '../middlewares/errorMiddleware'
 import { languageMiddleware } from '../middlewares/languageMiddleware'
-import { opensearchMiddleware } from '../middlewares/opensearchMiddleware'
 import { passportStrategyMiddleware } from '../middlewares/passportStrategyMiddleware'
 import { redisMiddleware } from '../middlewares/redisMiddleware'
 import { responseHandlerMiddleware } from '../middlewares/responseHandlerMiddleware'
@@ -52,8 +49,6 @@ const server = http.createServer(app)
 
 setImmediate(async () => {
   const redis = await getRedisClient(REDIS_CONFIG, true)
-
-  const opensearch = getOpensearchClient(OPENSEARCH_CONFIG)
 
   const redisPubSubPair = await getRedisPubSubPair(REDIS_CONFIG)
   const { userNamespace, devtel: devtelNamespace, socketIo } = await WebSockets.initialize(server)
@@ -146,9 +141,6 @@ setImmediate(async () => {
 
   // Bind redis to request
   app.use(redisMiddleware(redis))
-
-  // bind opensearch
-  app.use(opensearchMiddleware(opensearch))
 
   // Bind unleash to request
   if (UNLEASH_CONFIG.url && API_CONFIG.edition === Edition.HOSTED) {

@@ -1,4 +1,3 @@
-import { getOpensearchClient } from '@gitmesh/opensearch'
 import { getServiceChildLogger } from '@gitmesh/logging'
 import { OrganizationMergeSuggestionType } from '@gitmesh/types'
 import getUserContext from '../../../../database/utils/getUserContext'
@@ -10,7 +9,6 @@ import {
 } from '../../../../database/repositories/types/memberTypes'
 import SegmentService from '../../../../services/segmentService'
 import OrganizationService from '@/services/organizationService'
-import { OPENSEARCH_CONFIG } from '@/conf'
 
 const log = getServiceChildLogger('mergeSuggestionsWorker')
 
@@ -19,7 +17,7 @@ async function mergeSuggestionsWorker(tenantId): Promise<void> {
   const segmentService = new SegmentService(userContext)
   const { rows: segments } = await segmentService.querySubprojects({})
   userContext.currentSegments = segments
-  userContext.opensearch = getOpensearchClient(OPENSEARCH_CONFIG)
+  userContext.opensearch = null
 
   log.info(`Generating organization merge suggestions for tenant ${tenantId}!`)
 
