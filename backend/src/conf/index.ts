@@ -1,6 +1,5 @@
 import config from 'config'
 import { IRedisConfiguration } from '@gitmesh/redis'
-import { ISearchSyncApiConfig } from '@gitmesh/opensearch'
 import {
   SQSConfiguration,
   S3Configuration,
@@ -31,7 +30,6 @@ import {
   IntegrationProcessingConfiguration,
   SlackNotifierConfiguration,
   OrganizationEnrichmentConfiguration,
-  IOpenSearchConfig,
   Auth0Configuration,
   WeeklyEmailsConfiguration,
   GitmeshAnalyticsConfiguration,
@@ -115,8 +113,6 @@ export const SIGNALS_CONFIG: SignalsConfiguration = config.get<SignalsConfigurat
 
 export const UNLEASH_CONFIG: UnleashConfiguration = config.get<UnleashConfiguration>('unleash')
 
-export const OPENSEARCH_CONFIG: IOpenSearchConfig = config.get<IOpenSearchConfig>('opensearch')
-
 
 
 export const SLACK_ALERTING_CONFIG: SlackAlertingConfiguration =
@@ -136,6 +132,3 @@ export const ANALYTICS_CONFIG: GitmeshAnalyticsConfiguration =
 
 export const TEMPORAL_CONFIG: IBackendTemporalConfig =
   config.get<IBackendTemporalConfig>('temporal')
-
-export const SEARCH_SYNC_API_CONFIG: ISearchSyncApiConfig =
-  config.get<ISearchSyncApiConfig>('searchSyncApi')

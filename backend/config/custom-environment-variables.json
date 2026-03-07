@@ -183,12 +183,6 @@
   "weeklyEmails": {
     "enabled": "WEEKLY_EMAILS_ENABLED"
   },
-  "opensearch": {
-    "node": "OPENSEARCH_NODE",
-    "region": "OPENSEARCH_AWS_REGION",
-    "accessKeyId": "OPENSEARCH_AWS_ACCESS_KEY_ID",
-    "secretAccessKey": "OPENSEARCH_AWS_SECRET_ACCESS_KEY"
-  },
   "auth0": {
     "clientId": "AUTH0_CLIENT_ID",
     "jwks": "AUTH0_JWKS"

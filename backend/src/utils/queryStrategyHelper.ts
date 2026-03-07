@@ -3,7 +3,8 @@
  * 
  * This utility provides consistent query strategy logic across all services.
  * It ensures manually created items are always visible by forcing database queries
- * when manual items exist, preventing OpenSearch sync delay issues.
+ * when manual items exist. All queries now use the database directly
+ * (OpenSearch has been removed).
  */
 
 import { IServiceOptions } from '../services/IServiceOptions'
@@ -25,43 +26,12 @@ export interface QueryResult {
 
 /**
  * Determines if database query should be used instead of OpenSearch
- * Returns true if manual items exist, forcing database query for instant visibility
+ * Always returns true since OpenSearch has been removed.
  */
 export async function shouldUseDatabaseQuery(
   options: QueryStrategyOptions
 ): Promise<{ useDatabase: boolean; manualCount: number }> {
-  const { tableName, tenantId, database, logger } = options
-  
-  try {
-    const manualItemsCheck = await database.sequelize.query(
-      `SELECT COUNT(*) as count FROM ${tableName} 
-       WHERE "tenantId" = :tenantId 
-       AND "deletedAt" IS NULL 
-       AND "manuallyCreated" = true`,
-      {
-        replacements: { tenantId },
-        type: database.Sequelize.QueryTypes.SELECT,
-      }
-    )
-    
-    const manualCount = parseInt(manualItemsCheck[0]?.count || '0', 10)
-    const useDatabase = manualCount > 0
-    
-    if (useDatabase) {
-      logger.info(
-        { 
-          tableName,
-          manualItemsCount: manualCount 
-        }, 
-        'Manual items detected - using database query for guaranteed visibility'
-      )
-    }
-    
-    return { useDatabase, manualCount }
-  } catch (error) {
-    logger.error({ error, tableName }, 'Failed to check for manual items, defaulting to database query')
-    return { useDatabase: true, manualCount: 0 }
-  }
+  return { useDatabase: true, manualCount: 0 }
 }
 
 /**
@@ -97,21 +67,12 @@ export function normalizeQueryResult(
     }
   }
   
-  logger.info(
-    { 
-      context,
-      count: actualRows.length, 
-      rowsLength: actualRows.length 
-    }, 
-    'Query result validated'
-  )
-  
   return result
 }
 
 /**
- * Creates a unified query strategy that handles OpenSearch/Database fallback
- * with permanent manual item visibility and count normalization
+ * Creates a unified query strategy that always uses the database.
+ * OpenSearch has been removed; this class is kept for API compatibility.
  */
 export class UnifiedQueryStrategy {
   constructor(
@@ -121,35 +82,12 @@ export class UnifiedQueryStrategy {
   ) {}
   
   async executeQuery<T>(
-    opensearchQuery: () => Promise<QueryResult>,
+    _opensearchQuery: () => Promise<QueryResult>,
     databaseQuery: () => Promise<QueryResult>,
     context: string = 'query'
   ): Promise<QueryResult> {
-    // Check if we should use database query for manual items
-    const { useDatabase, manualCount } = await shouldUseDatabaseQuery({
-      tableName: this.tableName,
-      tenantId: this.options.currentTenant.id,
-      database: this.options.database,
-      logger: this.logger
-    })
-    
-    let result: QueryResult
-    
-    if (useDatabase) {
-      this.logger.info({ context, manualCount }, 'Using database query for manual items')
-      result = await databaseQuery()
-    } else {
-      try {
-        this.logger.info({ context }, 'Attempting OpenSearch query')
-        result = await opensearchQuery()
-        return result // OpenSearch results are typically already normalized
-      } catch (error) {
-        this.logger.warn({ error, context }, 'OpenSearch query failed, falling back to database')
-        result = await databaseQuery()
-      }
-    }
-    
-    // Normalize database query results
+    this.logger.info({ context }, 'Using database query')
+    const result = await databaseQuery()
     return normalizeQueryResult(result, this.logger, context)
   }
 }

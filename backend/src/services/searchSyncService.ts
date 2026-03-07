@@ -1,18 +1,16 @@
 import { LoggerBase } from '@gitmesh/logging'
-import { SearchSyncApiClient } from '@gitmesh/opensearch'
 import { SearchSyncWorkerEmitter } from '@gitmesh/sqs'
-import { FeatureFlag, SyncMode } from '@gitmesh/types'
-import { getSearchSyncApiClient } from '../utils/apiClients'
+import { SyncMode } from '@gitmesh/types'
 import { getSearchSyncWorkerEmitter } from '@/serverless/utils/serviceSQS'
-import isFeatureEnabled from '@/feature-flags/isFeatureEnabled'
-import { IS_TEST_ENV } from '@/conf'
 import { IServiceOptions } from './IServiceOptions'
 
-export type SearchSyncClient = SearchSyncApiClient | SearchSyncWorkerEmitter
-
+/**
+ * SearchSyncService - OpenSearch has been removed.
+ * All sync operations are now no-ops. Data is queried directly from the database.
+ * This class is kept for API compatibility so callers don't need to be updated.
+ */
 export default class SearchSyncService extends LoggerBase {
   options: IServiceOptions
-
   mode: SyncMode
 
   constructor(options: IServiceOptions, mode: SyncMode = SyncMode.USE_FEATURE_FLAG) {
@@ -21,180 +19,19 @@ export default class SearchSyncService extends LoggerBase {
     this.mode = mode
   }
 
-  async getSearchSyncClient(): Promise<SearchSyncClient> {
-    // tests can always use the async emitter
-    if (IS_TEST_ENV) {
-      return getSearchSyncWorkerEmitter()
-    }
-
-    if (this.mode === SyncMode.SYNCHRONOUS) {
-      return getSearchSyncApiClient()
-    }
-
-    if (this.mode === SyncMode.ASYNCHRONOUS) {
-      return getSearchSyncWorkerEmitter()
-    }
-
-    if (this.mode === SyncMode.USE_FEATURE_FLAG) {
-      if (await isFeatureEnabled(FeatureFlag.SYNCHRONOUS_OPENSEARCH_UPDATES, this.options)) {
-        return getSearchSyncApiClient()
-      }
-
-      return getSearchSyncWorkerEmitter()
-    }
-
-    throw new Error(`Unknown mode ${this.mode} !`)
-  }
-
-  async triggerMemberSync(tenantId: string, memberId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerMemberSync(memberId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerMemberSync(tenantId, memberId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerTenantMembersSync(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerTenantMembersSync(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerOrganizationMembersSync(organizationId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerOrganizationMembersSync(organizationId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerRemoveMember(tenantId: string, memberId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerRemoveMember(memberId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerRemoveMember(tenantId, memberId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerMemberCleanup(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerMemberCleanup(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerActivitySync(tenantId: string, activityId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerActivitySync(activityId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerActivitySync(tenantId, activityId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerTenantActivitiesSync(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerTenantActivitiesSync(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerOrganizationActivitiesSync(organizationId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerOrganizationActivitiesSync(organizationId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerRemoveActivity(tenantId: string, activityId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerRemoveActivity(activityId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerRemoveActivity(tenantId, activityId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerActivityCleanup(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerActivityCleanup(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerOrganizationSync(tenantId: string, organizationId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerOrganizationSync(organizationId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerOrganizationSync(tenantId, organizationId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerTenantOrganizationSync(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerTenantOrganizationSync(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerRemoveOrganization(tenantId: string, organizationId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient) {
-      await client.triggerRemoveOrganization(organizationId)
-    } else if (client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerRemoveOrganization(tenantId, organizationId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
-
-  async triggerOrganizationCleanup(tenantId: string) {
-    const client = await this.getSearchSyncClient()
-
-    if (client instanceof SearchSyncApiClient || client instanceof SearchSyncWorkerEmitter) {
-      await client.triggerOrganizationCleanup(tenantId)
-    } else {
-      throw new Error('Unexpected search client type!')
-    }
-  }
+  // All sync trigger methods are no-ops since OpenSearch is removed
+  async triggerMemberSync(_tenantId: string, _memberId: string) {}
+  async triggerTenantMembersSync(_tenantId: string) {}
+  async triggerOrganizationMembersSync(_organizationId: string) {}
+  async triggerRemoveMember(_tenantId: string, _memberId: string) {}
+  async triggerMemberCleanup(_tenantId: string) {}
+  async triggerActivitySync(_tenantId: string, _activityId: string) {}
+  async triggerTenantActivitiesSync(_tenantId: string) {}
+  async triggerOrganizationActivitiesSync(_organizationId: string) {}
+  async triggerRemoveActivity(_tenantId: string, _activityId: string) {}
+  async triggerActivityCleanup(_tenantId: string) {}
+  async triggerOrganizationSync(_tenantId: string, _organizationId: string) {}
+  async triggerTenantOrganizationSync(_tenantId: string) {}
+  async triggerRemoveOrganization(_tenantId: string, _organizationId: string) {}
+  async triggerOrganizationCleanup(_tenantId: string) {}
 }

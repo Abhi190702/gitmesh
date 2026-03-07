@@ -1,13 +1,2 @@
-import { SearchSyncApiClient } from '@gitmesh/opensearch'
-import { SEARCH_SYNC_API_CONFIG } from '../conf'
-
-const config = SEARCH_SYNC_API_CONFIG
-
-let searchSyncApiClient: SearchSyncApiClient
-export const getSearchSyncApiClient = async (): Promise<SearchSyncApiClient> => {
-  if (!searchSyncApiClient) {
-    searchSyncApiClient = new SearchSyncApiClient(config)
-  }
-
-  return searchSyncApiClient
-}
+// OpenSearch has been removed - SearchSyncApiClient is no longer used
+// This file is kept for compatibility but exports nothing
