@@ -14,7 +14,6 @@
 
 ### Build what wins, not what's loud.
 
-[![OSS Website](https://img.shields.io/badge/OSS_Website-000000?style=flat&logo=vercel&logoColor=white)](https://www.gitmesh.dev)
 [![Join Waitlist](https://img.shields.io/badge/Join_Waitlist-000000?style=flat&logo=mailchimp&logoColor=white)](https://www.alveoli.app)
 [![Join Weekly Dev Call](https://img.shields.io/badge/Join_Weekly_Dev_Call-000000?style=flat&logo=zoom&logoColor=white)](https://zoom-lfx.platform.linuxfoundation.org/meeting/96608771523?password=211b9c60-b73a-4545-8913-75ef933f9365)
 
@@ -24,19 +23,27 @@
 
 ## What is GitMesh?
 
-**GitMesh Community Edition** aggregates external product signals from GitHub, Reddit, X, Discord, and Stack Overflow, deduplicates and classifies them, and surfaces them alongside existing issues and sprints through two-way sync with Jira, GitHub, and Linear. Engineering and product teams get shared visibility into customer feedback and delivery progress in one place, reducing manual triage and context switching.
+**GitMesh Community Edition** is an open-source multi-agent orchestration runtime and governed MCP server purpose-built for open source projects. It enables AI agent teams — Triage, PR Review, Docs, Security, Community, Onboarding, and Release — to handle maintainer work autonomously, with every connected tool (Claude Code, Copilot, Cursor, Codex, Gemini CLI, and more) governed by a single maintainer-defined Policy-as-Code layer via OPA.
 
-<details>
-<summary><strong>Enterprise Edition</strong></summary>
+Built on a proven orchestration engine with atomic task checkout, persistent agent context, heartbeat scheduling, and budget enforcement, GitMesh extends this foundation with native GitHub/GitLab integration and distributes governance through MCP and ACP compatibility with every major AI coding tool. Any project can adopt it with one YAML file and one CI step.
 
-``` GitMesh Enterprise Edition adds a capacity-aware intelligence layer that correlates those signals with your product surface, roadmap constraints, and team capacity to produce capacity-constrained, ranked backlogs and executable GitHub issues with persistent decision rationale, approval workflows, and audit logs. Leaders interact through an agentic interface with role-based controls to propose, evaluate, and approve prioritization and sprint changes—turning visibility into velocity. ```
+### Core Capabilities
 
-Website: ``` www.alveoli.app ``` (Offered by Alveoli)
+- **Multi-Agent Orchestration** — Pre-defined OSS agent roles (Triage, PR Review, Docs, Security, Community, Onboarding, Release) with configurable heartbeat schedules, token budgets, and permission scopes
+- **Policy-as-Code via OPA** — Maintainers define governance rules in simple YAML that auto-compiles to Rego. No agent merges a PR, modifies CI/CD files, or publishes a security advisory without human approval
+- **GitHub/GitLab Native Sync** — Bidirectional issue and PR synchronization via webhooks. Agent actions (label, comment, review) push directly to the forge
+- **MCP Server** — Any MCP-compatible IDE (VS Code, Cursor, JetBrains) connects once and every AI tool is automatically governed by the project's policy
+- **ACP Orchestrator** — JSON-RPC 2.0 agent-to-agent coordination. Multiple agents work simultaneously without conflicts, double work, or runaway costs
+- **Immutable Audit Log** — Every action logged with actor, policy version, and outcome (allowed/blocked). Filterable and exportable as JSON/CSV
+- **Project Templates** — Pre-configured agent teams for CLI tools, JS libraries, DevOps projects, CNCF sandboxes, and solo maintainers. One-click adoption
 
-</details>
+### Three-View Dashboard
 
-
-
+| View | Purpose |
+|------|---------|
+| **Active Agents** | Agent status, budget consumption, current work. One-click pause, terminate, or reconfigure |
+| **Pending Approvals** | Mobile-first approval queue — merge PRs, CVE disclosures, issue closures. Clear in 5 minutes |
+| **Audit Log** | Chronological action history with policy outcome filtering |
 
 ---
 
@@ -116,6 +123,23 @@ Access your instance at `http://localhost:8081`
 > `ngrok http 8080`
 >
 > Afterwards, configure your Slack app's redirect URL with the generated `https://...ngrok.io/slack/callback` endpoint and update `slack_redirect_url` in your local configuration.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Server | Node.js + Express 5 + TypeScript (ESM) |
+| ORM / Database | Drizzle ORM + PostgreSQL (external or embedded) |
+| Auth | better-auth (humans) · HMAC-SHA256 JWTs (agents) |
+| Validation | Zod schemas (`@gitmesh/agents-shared`) |
+| Realtime | WebSocket (`ws`) live events |
+| UI | React 19 + Vite 6 + Tailwind v4 + shadcn/ui |
+| Data Fetching | TanStack React Query v5 |
+| CLI | Commander.js |
+| Build | tsc (prod) · tsx (dev) · esbuild (CLI) |
+| Test | Vitest + Supertest |
 
 ---
 
@@ -225,6 +249,18 @@ git pull
 # Restore your changes
 git stash pop
 ```
+
+---
+
+## Adoption Path
+
+| Stage | What Happens | Time |
+|-------|-------------|------|
+| **1. Zero-config entry** | Add `gitmesh/agent-gate` to CI — contributions are policy-checked immediately | 5 min |
+| **2. First agent** | Add `.gitmesh/agents.yaml`, enable Triage Agent, approve onboarding | 15 min |
+| **3. Connect tools** | Each developer adds GitMesh MCP server URL to their IDE config once | 2 min/dev |
+| **4. Expand the team** | Enable PR Review, Docs, Security agents as the project grows | On demand |
+| **5. Publish a template** | Share your agent configuration for other projects to adopt | Optional |
 
 ---
 
@@ -369,3 +405,20 @@ Choose your preferred channel based on your needs:
 *Like wolves navigating vast terrain with purpose and precision, GitMesh helps teams cut through the noise to reach their destination, shipping software that truly matters.*
 
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
