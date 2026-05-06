@@ -289,14 +289,6 @@ Full contributor workflow: **`doc/DEVELOPING.md`**, **`AGENTS.md`**.
   </tr>
 </table>
 
----
-
-## Project home
-
-GitMesh is developed as an open-source project under **[LF Decentralized Trust](https://www.lfdecentralizedtrust.org/)** (Linux Foundation).
-
----
-
 ## License
 
 Apache-2.0 — © 2026 LF Decentralized Trust
