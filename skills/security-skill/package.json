@@ -1,0 +1,14 @@
+{
+  "name": "@gitmesh/security-skill",
+  "version": "0.2.7",
+  "description": "GitMesh Security Skill - Security scanning and vulnerability detection",
+  "type": "module",
+  "license": "Apache-2.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./index.ts"
+    }
+  }
+}

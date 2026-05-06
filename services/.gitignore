@@ -1,5 +1,0 @@
-# Ignore compiled JS files in libs src/ (TypeScript source only)
-libs/**/src/**/*.js
-
-node_modules/
-dist/

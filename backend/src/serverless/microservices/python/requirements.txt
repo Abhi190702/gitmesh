@@ -1,3 +1,0 @@
--e ./gitmesh-backend
--e ./gitmesh-members-score
-python-json-logger

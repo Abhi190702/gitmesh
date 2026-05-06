@@ -1,0 +1,44 @@
+metadata:
+  slug: dependency-update-policy
+  title: Dependency update policy
+  whatItDoes: Treats `package.json` edits as needing approval, but allows lockfile updates (`package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`) to flow through automatically.
+  whatItProtects: Your supply chain decisions. Adding/removing dependencies is a policy decision; lockfile churn is mechanical.
+  whenToUse: Whenever you have agents that may update dependencies (security, docs, release roles).
+  auditExample: |
+    Agent "security-bot" attempted file_edit on package.json
+    → require_approval by policy `_starter_dependency-update-policy` v1 (manifest rule)
+    Then: agent attempted file_edit on pnpm-lock.yaml
+    → allowed by policy `_starter_dependency-update-policy` v1 (lockfile rule)
+  videoUrl: null
+  defaultEnabled: false
+# This template installs TWO policies — the loader handles `policies` (array) too.
+policies:
+  - name: _starter_dependency-manifest-approval
+    description: Edits to dependency manifests require approval
+    actionPattern: file_edit
+    conditions:
+      pathGlob:
+        - "package.json"
+        - "**/package.json"
+        - "Cargo.toml"
+        - "pyproject.toml"
+        - "requirements.txt"
+        - "go.mod"
+    effect: require_approval
+    effectConfig:
+      approverRoles: ["maintainer", "admin"]
+      timeout: "24h"
+    priority: 40
+  - name: _starter_dependency-lockfile-allow
+    description: Lockfile churn from dependency manifest changes is allowed
+    actionPattern: file_edit
+    conditions:
+      pathGlob:
+        - "package-lock.json"
+        - "pnpm-lock.yaml"
+        - "yarn.lock"
+        - "Cargo.lock"
+        - "poetry.lock"
+        - "go.sum"
+    effect: allow
+    priority: 41

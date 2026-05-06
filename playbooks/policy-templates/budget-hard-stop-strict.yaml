@@ -1,0 +1,31 @@
+metadata:
+  slug: budget-hard-stop-strict
+  title: Per-role monthly budget hard stop
+  whatItDoes: Sets per-role monthly token budgets and pauses any agent that exceeds them.
+  whatItProtects: Your wallet. AI spend grows non-linearly when an agent gets stuck in a loop.
+  whenToUse: Always. The default budget hard-stop is a project-wide safety net; this template adds per-role granularity.
+  auditExample: |
+    Agent "release-bot" (role=release) consumed 12.40 USD this month, exceeding 10.00 USD limit
+    → blocked by policy `_starter_budget-hard-stop-strict` v1
+    → agent paused; operator notified
+  videoUrl: null
+  defaultEnabled: false
+policy:
+  name: _starter_budget-hard-stop-strict
+  description: Block any action by an agent whose role budget is exceeded
+  actionPattern: "*"
+  conditions:
+    budgetExceeded:
+      - "true"
+  effect: block
+  effectConfig:
+    message: "Monthly per-role budget exceeded for this agent. Increase the budget in Settings → Agents to resume."
+    perRoleBudgetCents:
+      triage: 1000
+      pr_review: 3000
+      docs: 1500
+      security: 2000
+      community: 1000
+      onboarding: 1000
+      release: 1500
+  priority: 5

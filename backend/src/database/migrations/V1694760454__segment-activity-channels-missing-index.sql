@@ -1,1 +1,0 @@
-create index if not exists "ix_segmentActivityChannels_segmentId_platform" on "segmentActivityChannels" ("segmentId", platform);

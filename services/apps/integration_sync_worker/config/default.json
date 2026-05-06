@@ -1,8 +1,0 @@
-{
-  "service": {},
-  "db": {},
-  "sqs": {},
-  "redis": {},
-  "opensearch": {},
-  "nango": {}
-}

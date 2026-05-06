@@ -1,0 +1,22 @@
+metadata:
+  slug: no-merge-without-approval
+  title: No merge without approval
+  whatItDoes: Routes every PR-merge action by an agent through a human approval queue.
+  whatItProtects: Your main branch. An agent that can merge its own PRs has the keys to your release process.
+  whenToUse: Almost always. Most projects do not want unattended merges by an agent, even ones reviewed by humans on the PR thread itself.
+  auditExample: |
+    Agent "pr-review-bot" attempted to merge PR #482
+    → require_approval by policy `_starter_no-merge-without-approval` v1
+    → operator @maintainer-1 approved 14 minutes later
+    → audit row 8a72... attests both the request and the decision
+  videoUrl: null
+  defaultEnabled: true
+policy:
+  name: _starter_no-merge-without-approval
+  description: All PR merges by agents require human approval
+  actionPattern: merge_pr
+  effect: require_approval
+  effectConfig:
+    approverRoles: ["maintainer", "admin"]
+    timeout: "24h"
+  priority: 10

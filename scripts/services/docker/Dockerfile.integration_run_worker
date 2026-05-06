@@ -1,8 +1,0 @@
-ARG BASE_IMAGE=gitmesh-node-base:latest
-FROM ${BASE_IMAGE}
-
-COPY ./services/apps/integration_run_worker/package.json ./services/apps/integration_run_worker/pnpm-lock.yaml ./services/apps/integration_run_worker/tsconfig.json  ./services/apps/integration_run_worker/
-COPY ./services/apps/integration_run_worker/config ./services/apps/integration_run_worker/config
-COPY ./services/apps/integration_run_worker/src ./services/apps/integration_run_worker/src
-
-RUN cd services/apps/integration_run_worker && pnpm install --frozen-lockfile

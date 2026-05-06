@@ -1,8 +1,0 @@
-{
-  "db": {},
-  "sqs": {},
-  "redis": {},
-  "worker": {
-    "maxDataRetries": 5
-  }
-}

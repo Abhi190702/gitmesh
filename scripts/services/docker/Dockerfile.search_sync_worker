@@ -1,8 +1,0 @@
-ARG BASE_IMAGE=gitmesh-node-base:latest
-FROM ${BASE_IMAGE}
-
-COPY ./services/apps/search_sync_worker/package.json ./services/apps/search_sync_worker/pnpm-lock.yaml ./services/apps/search_sync_worker/tsconfig.json  ./services/apps/search_sync_worker/
-COPY ./services/apps/search_sync_worker/config ./services/apps/search_sync_worker/config
-COPY ./services/apps/search_sync_worker/src ./services/apps/search_sync_worker/src
-
-RUN cd services/apps/search_sync_worker && pnpm install --frozen-lockfile

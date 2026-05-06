@@ -1,7 +1,0 @@
-ARG BASE_IMAGE=gitmesh-node-base:latest
-FROM ${BASE_IMAGE}
-
-COPY ./services/apps/data_sink_worker/package.json ./services/apps/data_sink_worker/pnpm-lock.yaml ./services/apps/data_sink_worker/tsconfig.json  ./services/apps/data_sink_worker/
-COPY ./services/apps/data_sink_worker/config ./services/apps/data_sink_worker/config
-COPY ./services/apps/data_sink_worker/src ./services/apps/data_sink_worker/src
-RUN cd services/apps/data_sink_worker && pnpm install --frozen-lockfile

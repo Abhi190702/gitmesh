@@ -1,0 +1,27 @@
+metadata:
+  slug: triage-scope-limits
+  title: Triage scope limits
+  whatItDoes: Restricts triage agents to labeling and routing only — no merges, file edits, or pushes.
+  whatItProtects: Your scope discipline. A triage agent that can also merge starts to look like a single point of failure.
+  whenToUse: When you have a triage agent enabled. Pair with `no-merge-without-approval` for defence in depth.
+  auditExample: |
+    Agent "triage-bot" (role=triage) attempted file_edit on README.md
+    → blocked by policy `_starter_triage-scope-limits` v1
+    → audit row 8a72... attests block decision
+  videoUrl: null
+  defaultEnabled: false
+policy:
+  name: _starter_triage-scope-limits
+  description: Triage agents are limited to labeling and routing — block merges, edits, and pushes
+  actionPattern:
+    - "merge_pr"
+    - "file_edit"
+    - "push"
+    - "publish_release"
+  conditions:
+    agentRole:
+      - "triage"
+  effect: block
+  effectConfig:
+    message: "Triage agents are scope-limited to labeling and routing actions."
+  priority: 25

@@ -1,0 +1,27 @@
+metadata:
+  slug: working-hours-only
+  title: Working-hours-only execution
+  whatItDoes: Blocks agent actions outside the configured maintainer working hours and weekdays.
+  whatItProtects: Your sleep. Pages from runaway agents at 3 a.m. are the worst kind of operational debt.
+  whenToUse: When you want predictable, reviewable agent activity windows. Tune the timezone and hours per project.
+  auditExample: |
+    Agent "pr-review-bot" attempted pr_review at 03:14 UTC on Sunday
+    → blocked by policy `_starter_working-hours-only` v1
+    → audit row 8a72... attests block decision; the action is queued for next allowed window
+  videoUrl: null
+  defaultEnabled: false
+policy:
+  name: _starter_working-hours-only
+  description: Block agent actions outside configured working hours and weekdays
+  actionPattern: "*"
+  conditions:
+    insideWorkingHours:
+      - "false"
+  effect: block
+  effectConfig:
+    message: "This action is outside the project's configured working hours."
+    timezone: "UTC"
+    startHour: 9
+    endHour: 18
+    weekdays: [1, 2, 3, 4, 5]
+  priority: 50

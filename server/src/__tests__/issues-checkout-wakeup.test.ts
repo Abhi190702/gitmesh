@@ -1,0 +1,48 @@
+import { describe, expect, it } from "vitest";
+import { shouldWakeAssigneeOnCheckout } from "../api/issues-checkout-wakeup.js";
+
+describe("shouldWakeAssigneeOnCheckout", () => {
+  it("keeps wakeup behavior for operator actors", () => {
+    expect(
+      shouldWakeAssigneeOnCheckout({
+        actorType: "operator",
+        actorAgentId: null,
+        checkoutAgentId: "agent-1",
+        checkoutRunId: null,
+      }),
+    ).toBe(true);
+  });
+
+  it("skips wakeup for agent self-checkout in an active run", () => {
+    expect(
+      shouldWakeAssigneeOnCheckout({
+        actorType: "agent",
+        actorAgentId: "agent-1",
+        checkoutAgentId: "agent-1",
+        checkoutRunId: "run-1",
+      }),
+    ).toBe(false);
+  });
+
+  it("still wakes when checkout run id is missing", () => {
+    expect(
+      shouldWakeAssigneeOnCheckout({
+        actorType: "agent",
+        actorAgentId: "agent-1",
+        checkoutAgentId: "agent-1",
+        checkoutRunId: null,
+      }),
+    ).toBe(true);
+  });
+
+  it("still wakes when agent checks out on behalf of another agent id", () => {
+    expect(
+      shouldWakeAssigneeOnCheckout({
+        actorType: "agent",
+        actorAgentId: "agent-1",
+        checkoutAgentId: "agent-2",
+        checkoutRunId: "run-1",
+      }),
+    ).toBe(true);
+  });
+});

@@ -1,0 +1,50 @@
+{
+  "name": "gitmesh-agents-monorepo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "setup:start": "node scripts/setup.mjs --start",
+    "dev": "node scripts/dev-runner.mjs watch",
+    "dev:watch": "GITMESH_MIGRATION_PROMPT=never node scripts/dev-runner.mjs watch",
+    "dev:once": "node scripts/dev-runner.mjs dev",
+    "dev:server": "pnpm --filter @gitmesh/server dev",
+    "dev:ui": "pnpm --filter @gitmesh/agents-ui dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d",
+    "db:down": "docker compose -f docker-compose.dev.yml down",
+    "db:logs": "docker compose -f docker-compose.dev.yml logs -f postgres",
+    "db:generate": "pnpm --filter @gitmesh/data generate",
+    "db:migrate": "pnpm --filter @gitmesh/data migrate",
+    "secrets:migrate-inline-env": "tsx scripts/migrate-inline-env-secrets.ts",
+    "db:backup": "./scripts/backup-db.sh",
+    "claude:proxy:start": "node scripts/claude-anthropic-proxy.mjs",
+    "claude:official": "./scripts/claude-mode-official.sh",
+    "claude:proxy": "./scripts/claude-mode-proxy.sh",
+    "gitmesh-agents": "node cli/node_modules/tsx/dist/cli.mjs cli/src/index.ts",
+    "build:npm": "./scripts/build-npm.sh",
+    "release": "./scripts/release.sh",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "check:tokens": "node scripts/check-forbidden-tokens.mjs",
+    "docs:dev": "cd docs && npx mintlify dev"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.4",
+  "pnpm": {
+    "overrides": {
+      "drizzle-orm": "0.38.4"
+    }
+  }
+}

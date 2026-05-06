@@ -1,0 +1,37 @@
+{
+  "name": "@gitmesh/adapter-shared",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./coerce": "./src/coerce.ts",
+    "./event-format": "./src/event-format.ts"
+  },
+  "publishConfig": {
+    "exports": {
+      "./coerce": {
+        "types": "./dist/coerce.d.ts",
+        "import": "./dist/coerce.js"
+      },
+      "./event-format": {
+        "types": "./dist/event-format.d.ts",
+        "import": "./dist/event-format.js"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.7.3"
+  }
+}

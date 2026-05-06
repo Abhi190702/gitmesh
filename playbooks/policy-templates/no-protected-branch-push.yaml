@@ -1,0 +1,26 @@
+metadata:
+  slug: no-protected-branch-push
+  title: No direct push to protected branches
+  whatItDoes: Blocks agents from pushing directly to main, master, develop, or release branches.
+  whatItProtects: The branches your team treats as authoritative. Forces all agent changes through PR.
+  whenToUse: Always. Agents should propose changes via PR, never push directly to a branch other people merge from.
+  auditExample: |
+    Agent "docs-bot" attempted push to main
+    → blocked by policy `_starter_no-protected-branch-push` v1
+    → audit row 8a72... attests block decision
+  videoUrl: null
+  defaultEnabled: true
+policy:
+  name: _starter_no-protected-branch-push
+  description: Block direct push to protected branches
+  actionPattern: push
+  conditions:
+    targetBranch:
+      - "main"
+      - "master"
+      - "develop"
+      - "release/*"
+  effect: block
+  effectConfig:
+    message: "Direct pushes to protected branches are not allowed. Open a PR instead."
+  priority: 20

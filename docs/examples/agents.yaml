@@ -1,0 +1,82 @@
+# GitMesh Agent Configuration
+#
+# Place this file at `.gitmesh/agents.yaml` in your repository root.
+# GitMesh reads this file to configure which agents run on your project,
+# their schedules, budgets, and triggers.
+#
+# See: https://github.com/LF-Decentralized-Trust-labs/gitmesh/blob/main/docs/guides/agents-yaml.md
+
+agents:
+  - name: Issue Triage
+    role: triage
+    schedule: "0 * * * *" # every hour
+    budget: 5000 # tokens/month
+    triggers:
+      - issue_opened
+      - issue_reopened
+
+  - name: PR Review
+    role: pr_review
+    triggers:
+      - pr_opened
+    budget: 10000
+
+  - name: Docs Sync
+    role: docs
+    schedule: "0 2 * * *" # daily at 2am
+    budget: 3000
+    triggers:
+      - pr_opened
+
+  - name: Security Agent
+    role: security
+    schedule: "0 9 * * 1" # weekly, Monday at 9am
+    budget: 5000
+    requires_approval: true
+    triggers:
+      - pr_opened
+
+  - name: Community Agent
+    role: community
+    schedule: "0 */6 * * *" # every 6 hours
+    budget: 3000
+    triggers:
+      - issue_opened
+      - issue_comment
+
+  - name: Onboarding Agent
+    role: onboarding
+    triggers:
+      - pr_opened # only fires for first-time contributors
+    budget: 2000
+
+  - name: Release Agent
+    role: release
+    # manual trigger only — maintainer calls via UI or API
+    budget: 2000
+    requires_approval: true
+
+policies:
+  - name: Require approval for merge
+    actionPattern: merge_pr
+    effect: require_approval
+    priority: 10
+
+  - name: Block push to main
+    actionPattern: push
+    conditions:
+      targetBranch: [main, master]
+    effect: block
+    priority: 20
+
+  - name: Allow triage actions
+    actionPattern: "close_issue|add_label|assign_issue"
+    conditions:
+      agentRole: [triage]
+    effect: allow
+    priority: 50
+
+  - name: Default allow
+    actionPattern: "*"
+    effect: allow
+    priority: 1000

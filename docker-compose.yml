@@ -1,125 +1,38 @@
-version: '3.8'
-
 services:
-  # Node.js Backend API
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - ./backend/.env.dist.local
+  db:
+    image: postgres:17-alpine
     environment:
-      - NODE_ENV=development
-      - PORT=8080
-      - CUBEJS_URL=http://cubejs:4000
-      - CUBEJS_JWT_SECRET=137ea167812145c6d77452a58d7dd29b
-      - CUBEJS_JWT_EXPIRY=2h
-    depends_on:
-      - postgres
-      - redis
-      - cubejs
+      POSTGRES_USER: gitmesh
+      POSTGRES_PASSWORD: gitmesh
+      POSTGRES_DB: gitmesh
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - devspace-network
-
-
-  # Vue.js Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    ports:
-      - "8081:8081"
-    environment:
-      - NODE_ENV=development
-      - VUE_APP_BACKEND_URL=http://localhost:8080
-      - BACKEND_URL=http://backend:8080
-      - VITE_WS_URL=ws://localhost:8081
-      - VUE_APP_NANGO_PUBLIC_KEY=bd44889e-3c6d-48b9-9a32-75df76e561b6
-      - VUE_APP_CUBEJS_URL=http://localhost:4000
-    depends_on:
-      - backend
-    networks:
-      - devspace-network
-
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    ports:
-      - "5432:5432"
-    env_file:
-      - ./backend/.env.dist.local
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U devspace" ]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U gitmesh -d gitmesh"]
+      interval: 2s
       timeout: 5s
-      retries: 5
-    networks:
-      - devspace-network
-
-  # Redis Cache
-  redis:
-    image: redis:7-alpine
+      retries: 30
     ports:
-      - "6379:6379"
+      - "5433:5432"
     volumes:
-      - redis_data:/data
-    healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - devspace-network
+      - pgdata:/var/lib/postgresql/data
 
-  # CubeJS Analytics
-  cubejs:
-    image: cubejs/cube
-    restart: always
+  server:
+    build: .
     ports:
-      - "4000:4000"
-      - "3001:3000"
-    volumes:
-      - "./services/libs/cubejs:/cube/conf"
-    env_file:
-      - ./backend/.env.dist.local
+      - "3100:3100"
     environment:
-      - CUBEJS_DEV_MODE=true
-      - CUBEJS_DB_HOST=postgres
-      - CUBEJS_DB_PORT=5432
-      - CUBEJS_DB_TYPE=postgres
-      - CUBEJS_API_SECRET=137ea167812145c6d77452a58d7dd29b
-      - CUBEJS_EXTERNAL_DEFAULT=true
-      - CUBEJS_SCHEDULED_REFRESH_DEFAULT=true
+      DATABASE_URL: postgres://gitmesh:gitmesh@db:5432/gitmesh-agents
+      PORT: "3100"
+      SERVE_UI: "true"
+      GITMESH_DEPLOYMENT_MODE: "authenticated"
+      GITMESH_DEPLOYMENT_EXPOSURE: "private"
+      GITMESH_PUBLIC_URL: "${GITMESH_PUBLIC_URL:-http://localhost:3100}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
+    volumes:
+      - gitmesh-data:/gitmesh-agents
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "require('http').get('http://localhost:4000/readyz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-    networks:
-      - devspace-network
-
-networks:
-  devspace-network:
-    driver: bridge
 
 volumes:
-  postgres_data:
-  redis_data:
+  pgdata:
+  gitmesh-data:

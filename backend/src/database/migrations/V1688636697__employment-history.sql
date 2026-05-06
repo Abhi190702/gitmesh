@@ -1,3 +1,0 @@
-ALTER TABLE "memberOrganizations" ADD COLUMN "dateStart" TIMESTAMP WITH TIME ZONE NULL;
-ALTER TABLE "memberOrganizations" ADD COLUMN "dateEnd" TIMESTAMP WITH TIME ZONE NULL;
-ALTER TABLE "memberOrganizations" ADD COLUMN "title" VARCHAR(255) NULL;
