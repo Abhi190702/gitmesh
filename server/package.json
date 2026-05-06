@@ -44,7 +44,7 @@
     "@open-policy-agent/opa-wasm": "^1.10.0",
     "@octokit/rest": "^21.0.0",
     "better-auth": "1.4.18",
-    "drizzle-orm": "0.38.4",
+    "drizzle-orm": "0.45.2",
     "detect-port": "^2.1.0",
     "dotenv": "^17.0.1",
     "embedded-postgres": "^18.1.0-beta.16",
