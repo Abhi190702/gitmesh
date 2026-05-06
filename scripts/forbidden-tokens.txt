@@ -1,0 +1,11 @@
+# Legacy pre-rename brand/package/env markers
+hex:7061706572636c69706169
+hex:407061706572636c697061692f
+hex:5041504552434c49505f
+hex:7061706572636c69702e6a736f6e
+hex:7e2f2e7061706572636c69702f
+
+# Legacy links and placeholders that should not reappear in user-facing content.
+# Encoded as hex so the scanner never matches itself.
+hex:6769746d6573682d6167656e74732f6769746d6573682d6167656e7473
+hex:646973636f72642e67672f6d34485a5937784e4733

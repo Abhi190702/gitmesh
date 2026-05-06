@@ -1,0 +1,26 @@
+metadata:
+  slug: large-pr-approval
+  title: Large-PR approval gate
+  whatItDoes: Routes any agent action on a PR larger than a configured diff threshold through approval.
+  whatItProtects: Your codebase from oversized agent rewrites. Large diffs are where review fatigue hides bugs.
+  whenToUse: When agents touch your codebase. The default threshold is 500 lines; tune to your project.
+  auditExample: |
+    Agent "docs-bot" attempted merge_pr on PR #482 (1240 lines changed)
+    → require_approval by policy `_starter_large-pr-approval` v1
+    → maintainer reviewed and approved
+  videoUrl: null
+  defaultEnabled: false
+policy:
+  name: _starter_large-pr-approval
+  description: PRs over the diff threshold require human approval
+  actionPattern: merge_pr
+  conditions:
+    diffSizeTier:
+      - "large"
+      - "huge"
+  effect: require_approval
+  effectConfig:
+    approverRoles: ["maintainer", "admin"]
+    diffThresholdLines: 500
+    timeout: "48h"
+  priority: 22

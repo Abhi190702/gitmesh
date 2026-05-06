@@ -1,0 +1,14 @@
+{
+  "name": "@gitmesh/pr-review-skill",
+  "version": "0.2.7",
+  "description": "GitMesh PR Review Skill - Code review analysis and feedback",
+  "type": "module",
+  "license": "Apache-2.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./index.ts"
+    }
+  }
+}

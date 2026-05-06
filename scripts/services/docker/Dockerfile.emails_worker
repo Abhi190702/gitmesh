@@ -1,8 +1,0 @@
-ARG BASE_IMAGE=gitmesh-node-base:latest
-FROM ${BASE_IMAGE}
-
-COPY ./services/apps/emails_worker/package.json ./services/apps/emails_worker/pnpm-lock.yaml ./services/apps/emails_worker/tsconfig.json  ./services/apps/emails_worker/
-# COPY ./services/apps/emails_worker/config ./services/apps/emails_worker/config
-COPY ./services/apps/emails_worker/src ./services/apps/emails_worker/src
-
-RUN cd services/apps/emails_worker && pnpm install --frozen-lockfile

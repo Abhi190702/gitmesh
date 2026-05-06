@@ -1,0 +1,14 @@
+{
+  "name": "@gitmesh/community-skill",
+  "version": "0.2.7",
+  "description": "GitMesh Community Skill - Community engagement and discussion monitoring",
+  "type": "module",
+  "license": "Apache-2.0",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": "./index.ts",
+      "types": "./index.ts"
+    }
+  }
+}

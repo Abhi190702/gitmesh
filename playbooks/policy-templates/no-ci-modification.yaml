@@ -1,0 +1,28 @@
+metadata:
+  slug: no-ci-modification
+  title: No CI/CD modification
+  whatItDoes: Blocks any agent from editing CI/CD configuration files.
+  whatItProtects: Your release pipeline. An agent that can edit `.github/workflows/*` can self-bless its own changes by re-writing the checks.
+  whenToUse: Always. There is no agent role that legitimately needs to modify CI; humans do that during onboarding and infra changes.
+  auditExample: |
+    Agent "release-bot" attempted to modify .github/workflows/release.yml
+    → blocked by policy `_starter_no-ci-modification` v1
+    → audit row 8a72... attests block decision
+  videoUrl: null
+  defaultEnabled: true
+policy:
+  name: _starter_no-ci-modification
+  description: Block agent edits to CI/CD configuration files
+  actionPattern: file_edit
+  conditions:
+    pathGlob:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+      - ".gitlab-ci.yml"
+      - ".circleci/config.yml"
+      - "Jenkinsfile"
+      - "azure-pipelines.yml"
+  effect: block
+  effectConfig:
+    message: "Editing CI configuration is not permitted by this project's policy."
+  priority: 30

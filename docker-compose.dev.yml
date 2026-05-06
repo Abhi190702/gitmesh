@@ -1,0 +1,36 @@
+# Optional Docker Postgres for GitMesh local dev.
+#
+# By default GitMesh uses an embedded PostgreSQL at
+# ~/.gitmesh-agents/instances/default/db/. This compose file is only for users
+# who prefer running Postgres in Docker.
+#
+# Usage:
+#   pnpm db:up           # start postgres on localhost:5433
+#   pnpm db:down         # stop and remove the container (volume is preserved)
+#   pnpm db:logs         # tail postgres logs
+#
+# Then set DATABASE_URL in .env:
+#   DATABASE_URL=postgres://gitmesh:gitmesh@localhost:5433/gitmesh
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gitmesh-dev-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gitmesh
+      POSTGRES_PASSWORD: gitmesh
+      POSTGRES_DB: gitmesh
+    ports:
+      - "5433:5432"
+    volumes:
+      - gitmesh_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gitmesh -d gitmesh"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  gitmesh_pg_data:
+    name: gitmesh_pg_data

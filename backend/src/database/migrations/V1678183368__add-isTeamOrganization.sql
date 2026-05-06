@@ -1,1 +1,0 @@
-ALTER TABLE organizations ADD COLUMN "isTeamOrganization" BOOLEAN NOT NULL DEFAULT FALSE;

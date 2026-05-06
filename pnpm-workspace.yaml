@@ -1,0 +1,7 @@
+packages:
+  - lib/*
+  - lib/adapters/*
+  - server
+  - ui
+  - cli
+  - skills/**

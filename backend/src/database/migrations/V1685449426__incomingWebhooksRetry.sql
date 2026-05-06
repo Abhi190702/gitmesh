@@ -1,1 +1,0 @@
-ALTER TABLE public."incomingWebhooks" ADD COLUMN "retries" int default 0;

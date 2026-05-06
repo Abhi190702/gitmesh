@@ -1,0 +1,601 @@
+/*
+ * GitMesh — Forge Instrumentation Console
+ *
+ * Design language:
+ *   - No paper-warm cream, no copper, no editorial serif in the app shell.
+ *   - Deep ink + a single signal palette: cyan = attested/allow,
+ *     magenta = blocked, amber = pending/approval. Numbers tell the story.
+ *   - Mono-first: JetBrains Mono drives chrome and metrics. Sans is reserved
+ *     for body prose.
+ *   - Hairline rules, not card shadows. Density reads as instrumentation,
+ *     not Notion.
+ */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  /* GitMesh signal palette — referenced directly by the new shell. */
+  --color-verdict-allow: var(--verdict-allow);
+  --color-verdict-block: var(--verdict-block);
+  --color-verdict-pending: var(--verdict-pending);
+  --color-verdict-attested: var(--verdict-attested);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  /* Mono-first. Sans is for body prose only. No serif in the shell. */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-display: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --shadow-1: none;
+  --shadow-2: none;
+  --shadow-3: 0 0 0 1px var(--border);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--verdict-attested) 50%, transparent);
+}
+
+:root {
+  color-scheme: dark;
+  --radius: 0.25rem;
+
+  /* ── Light variant (cool slate ink, secondary) ───────────────────────── */
+  --background: oklch(0.985 0.005 240);
+  --foreground: oklch(0.18 0.012 245);
+  --surface-1: oklch(0.985 0.005 240);
+  --surface-2: oklch(0.965 0.006 245);
+  --surface-3: oklch(0.945 0.007 245);
+  --card: oklch(0.99 0.004 240);
+  --card-foreground: oklch(0.18 0.012 245);
+  --popover: oklch(0.99 0.004 240);
+  --popover-foreground: oklch(0.18 0.012 245);
+  --primary: oklch(0.62 0.16 195);
+  --primary-foreground: oklch(0.13 0.012 245);
+  --secondary: oklch(0.93 0.01 240);
+  --secondary-foreground: oklch(0.20 0.012 245);
+  --muted: oklch(0.94 0.008 240);
+  --muted-foreground: oklch(0.46 0.012 245);
+  --accent: oklch(0.92 0.012 240);
+  --accent-foreground: oklch(0.20 0.012 245);
+  --destructive: oklch(0.55 0.22 18);
+  --destructive-foreground: oklch(0.99 0.005 240);
+  --warning: oklch(0.74 0.16 70);
+  --warning-foreground: oklch(0.20 0.012 245);
+  --success: oklch(0.60 0.16 162);
+  --success-foreground: oklch(0.99 0.005 240);
+  --border: oklch(0.86 0.012 240);
+  --border-strong: oklch(0.78 0.014 245);
+  --input: oklch(0.86 0.012 240);
+  --ring: oklch(0.62 0.16 195);
+  --text-primary: oklch(0.18 0.012 245);
+  --text-secondary: oklch(0.40 0.012 245);
+  --text-tertiary: oklch(0.56 0.012 245);
+  --text-inverse: oklch(0.99 0.005 240);
+  /* Verdict / signal palette: cyan / magenta / amber / mint */
+  --verdict-allow: oklch(0.62 0.16 162);
+  --verdict-block: oklch(0.58 0.22 350);
+  --verdict-pending: oklch(0.74 0.15 75);
+  --verdict-attested: oklch(0.66 0.13 195);
+  --chart-1: var(--verdict-attested);
+  --chart-2: var(--verdict-allow);
+  --chart-3: var(--verdict-pending);
+  --chart-4: var(--verdict-block);
+  --chart-5: oklch(0.55 0.18 285);
+  --sidebar: oklch(0.96 0.006 245);
+  --sidebar-foreground: oklch(0.18 0.012 245);
+  --sidebar-primary: oklch(0.62 0.16 195);
+  --sidebar-primary-foreground: oklch(0.13 0.012 245);
+  --sidebar-accent: oklch(0.92 0.012 240);
+  --sidebar-accent-foreground: oklch(0.20 0.012 245);
+  --sidebar-border: oklch(0.86 0.012 240);
+  --sidebar-ring: oklch(0.62 0.16 195);
+}
+
+.dark {
+  /* ── Dark default — deep ink, signal-cyan accent ─────────────────────── */
+  color-scheme: dark;
+  --background: oklch(0.135 0.012 250);
+  --foreground: oklch(0.95 0.006 240);
+  --surface-1: oklch(0.135 0.012 250);
+  --surface-2: oklch(0.165 0.014 250);
+  --surface-3: oklch(0.195 0.015 250);
+  --card: oklch(0.165 0.014 250);
+  --card-foreground: oklch(0.95 0.006 240);
+  --popover: oklch(0.18 0.015 250);
+  --popover-foreground: oklch(0.95 0.006 240);
+  --primary: oklch(0.78 0.13 195);
+  --primary-foreground: oklch(0.12 0.014 250);
+  --secondary: oklch(0.21 0.014 250);
+  --secondary-foreground: oklch(0.95 0.006 240);
+  --muted: oklch(0.20 0.014 250);
+  --muted-foreground: oklch(0.68 0.012 245);
+  --accent: oklch(0.23 0.016 250);
+  --accent-foreground: oklch(0.95 0.006 240);
+  --destructive: oklch(0.70 0.22 350);
+  --destructive-foreground: oklch(0.99 0.005 240);
+  --warning: oklch(0.80 0.16 78);
+  --warning-foreground: oklch(0.13 0.014 250);
+  --success: oklch(0.78 0.16 162);
+  --success-foreground: oklch(0.13 0.014 250);
+  --border: oklch(0.245 0.014 250);
+  --border-strong: oklch(0.32 0.016 250);
+  --input: oklch(0.245 0.014 250);
+  --ring: oklch(0.78 0.13 195);
+  --text-primary: oklch(0.95 0.006 240);
+  --text-secondary: oklch(0.74 0.012 245);
+  --text-tertiary: oklch(0.55 0.012 245);
+  --text-inverse: oklch(0.13 0.014 250);
+  /* Verdict / signal palette */
+  --verdict-allow: oklch(0.80 0.18 162);
+  --verdict-block: oklch(0.70 0.24 350);
+  --verdict-pending: oklch(0.82 0.16 75);
+  --verdict-attested: oklch(0.78 0.13 195);
+  --chart-1: var(--verdict-attested);
+  --chart-2: var(--verdict-allow);
+  --chart-3: var(--verdict-pending);
+  --chart-4: var(--verdict-block);
+  --chart-5: oklch(0.72 0.18 285);
+  --sidebar: oklch(0.115 0.012 250);
+  --sidebar-foreground: oklch(0.94 0.006 240);
+  --sidebar-primary: oklch(0.78 0.13 195);
+  --sidebar-primary-foreground: oklch(0.12 0.014 250);
+  --sidebar-accent: oklch(0.21 0.016 250);
+  --sidebar-accent-foreground: oklch(0.95 0.006 240);
+  --sidebar-border: oklch(0.21 0.014 250);
+  --sidebar-ring: oklch(0.78 0.13 195);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    height: 100%;
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11", "tnum";
+    -webkit-tap-highlight-color: color-mix(in oklab, var(--foreground) 20%, transparent);
+  }
+  body {
+    @apply bg-background text-foreground;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11", "tnum";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* In-app headings are mono — instrumentation, not editorial. */
+  #main-content :where(h1, h2, h3),
+  .gitmesh-display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 500;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  a, button, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+  }
+  .tabular-nums, [data-numerics="tabular"], .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (pointer: coarse) {
+  button, [role="button"], input, select, textarea, [data-slot="select-trigger"] {
+    min-height: 44px;
+  }
+}
+
+/* ── Scrollbars ─────────────────────────────────────────────────────────── */
+.dark { color-scheme: dark; }
+.dark *::-webkit-scrollbar { width: 6px; height: 6px; }
+.dark *::-webkit-scrollbar-track { background: transparent; }
+.dark *::-webkit-scrollbar-thumb {
+  background: oklch(0.38 0.012 250 / 0.4);
+  border-radius: 999px;
+}
+.dark *::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--verdict-attested) 50%, transparent);
+}
+.gitmesh-scrollbar::-webkit-scrollbar { width: 6px !important; background: transparent !important; }
+.gitmesh-scrollbar::-webkit-scrollbar-track { background: transparent !important; }
+.gitmesh-scrollbar::-webkit-scrollbar-thumb { background: transparent !important; border-radius: 999px !important; }
+.gitmesh-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 18%, transparent) !important;
+}
+.gitmesh-scrollbar:hover::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--verdict-attested) 60%, transparent) !important;
+}
+
+/* ── Shell ──────────────────────────────────────────────────────────────── */
+.gitmesh-topnav { z-index: 20; }
+.gitmesh-shell { position: relative; }
+/* No editorial paper rules. Replaced with a subtle scanline that reads as
+   instrumentation. */
+.gitmesh-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, transparent 0, transparent 96%, color-mix(in oklab, var(--verdict-attested) 4%, transparent) 100%);
+  opacity: 1;
+}
+
+/* ── Mesh Spine: the persistent left timeline column ──────────────────── */
+.mesh-spine {
+  position: relative;
+  background: var(--surface-1);
+  border-right: 1px solid var(--border);
+  /* Match timeline list: px-4 + w-7 node rail — line through dot centers */
+  --mesh-spine-pad-x: 1rem;
+  --mesh-spine-node-rail: 1.75rem;
+}
+.mesh-spine::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(var(--mesh-spine-pad-x) + var(--mesh-spine-node-rail) / 2 - 0.5px);
+  width: 1px;
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--verdict-attested) 45%, transparent) 0%,
+    var(--border) 6%,
+    var(--border) 94%,
+    color-mix(in oklab, var(--verdict-attested) 45%, transparent) 100%
+  );
+  pointer-events: none;
+}
+.mesh-node {
+  position: relative;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--background);
+  box-shadow: 0 0 0 1px var(--border);
+  background: var(--surface-3);
+  z-index: 1;
+}
+.mesh-node[data-verdict="allow"] { background: var(--verdict-allow); box-shadow: 0 0 0 1px color-mix(in oklab, var(--verdict-allow) 60%, transparent), 0 0 12px -2px var(--verdict-allow); }
+.mesh-node[data-verdict="block"] { background: var(--verdict-block); box-shadow: 0 0 0 1px color-mix(in oklab, var(--verdict-block) 60%, transparent), 0 0 12px -2px var(--verdict-block); }
+.mesh-node[data-verdict="pending"], .mesh-node[data-verdict="require_approval"] {
+  background: var(--verdict-pending);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--verdict-pending) 60%, transparent), 0 0 12px -2px var(--verdict-pending);
+}
+.mesh-node[data-running="true"] {
+  animation: mesh-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes mesh-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+/* ── Verdict chips inline with event rows ─────────────────────────────── */
+.verdict-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.verdict-chip[data-verdict="allow"] { color: var(--verdict-allow); }
+.verdict-chip[data-verdict="block"] { color: var(--verdict-block); }
+.verdict-chip[data-verdict="require_approval"], .verdict-chip[data-verdict="pending"] { color: var(--verdict-pending); }
+.verdict-chip[data-verdict="attested"] { color: var(--verdict-attested); }
+
+/* Pulsing dot used as live indicator */
+@keyframes gm-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.85); }
+}
+.gm-pulse-dot { animation: gm-pulse 2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .gm-pulse-dot { animation: none; } .mesh-node[data-running="true"] { animation: none; } }
+
+/* ── Glyph rail (replaces wide sidebar) ───────────────────────────────── */
+.glyph-rail {
+  background: var(--surface-1);
+  border-right: 1px solid var(--border);
+}
+.glyph-rail-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px 0;
+  color: var(--text-tertiary);
+  transition: color 120ms ease;
+}
+.glyph-rail-item:hover { color: var(--foreground); }
+.glyph-rail-item[data-active="true"] { color: var(--verdict-attested); }
+.glyph-rail-item[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: var(--verdict-attested);
+}
+.glyph-rail-item .tooltip {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+  z-index: 50;
+}
+.glyph-rail-item:hover .tooltip,
+.glyph-rail-item:focus-visible .tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(2px);
+}
+
+/* ── Ticker strip (top-of-main metrics, mono numerics) ─────────────────── */
+.gm-ticker {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklab, var(--surface-2) 80%, transparent);
+}
+.gm-ticker-cell {
+  padding: 10px 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gm-ticker-cell:last-child { border-right: 0; }
+.gm-ticker-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.gm-ticker-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Run waterfall row ─────────────────────────────────────────────────── */
+.gm-waterfall-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 16px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.gm-waterfall-bar {
+  position: relative;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.gm-waterfall-bar > span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--verdict-attested);
+  box-shadow: 0 0 8px -1px var(--verdict-attested);
+}
+.gm-waterfall-bar[data-state="running"] > span {
+  background: linear-gradient(
+    90deg,
+    var(--verdict-attested) 0%,
+    color-mix(in oklab, var(--verdict-attested) 40%, transparent) 100%
+  );
+  animation: mesh-waterfall-shimmer 1.4s linear infinite;
+}
+@keyframes mesh-waterfall-shimmer {
+  0% { transform: translateX(-10%); }
+  100% { transform: translateX(0%); }
+}
+
+/* ── Activity row animation (kept) ─────────────────────────────────────── */
+@keyframes gitmesh-row-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.activity-row-enter { animation: gitmesh-row-enter 200ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .activity-row-enter { animation: none; } }
+
+/* ── MDXEditor theme (kept; tokens map to new palette) ─────────────────── */
+.gitmesh-agents-mdxeditor-scope,
+.gitmesh-agents-mdxeditor {
+  --baseBase: var(--background);
+  --baseBg: transparent;
+  --baseBgSubtle: color-mix(in oklab, var(--verdict-attested) 6%, var(--background));
+  --baseLine: var(--border);
+  --baseSolid: var(--muted-foreground);
+  --baseSolidHover: var(--foreground);
+  --baseText: var(--muted-foreground);
+  --baseBorderColor: var(--border);
+  --baseBorder: var(--border);
+  --baseBorderHover: var(--ring);
+  --baseTextContrast: var(--foreground);
+  --baseTextContrastMuted: var(--muted-foreground);
+  --baseTextEmphasis: var(--foreground);
+  --basePageBg: var(--background);
+  --baseRadius: var(--radius);
+  --baseLineHeight: 1.6;
+  --accentBorder: color-mix(in oklab, var(--verdict-attested) 30%, var(--border));
+  --accentSolid: var(--verdict-attested);
+  --accentSolidHover: var(--verdict-attested);
+  --accentLine: color-mix(in oklab, var(--verdict-attested) 15%, transparent);
+  --accentBg: var(--accent);
+  --accentBgHover: color-mix(in oklab, var(--accent) 80%, var(--background));
+  --accentBgActive: color-mix(in oklab, var(--accent) 72%, var(--background));
+  --accentText: var(--accent-foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+
+.gitmesh-agents-mdxeditor-scope [class*="_iconButton_"],
+.gitmesh-agents-mdxeditor [class*="_iconButton_"] { color: var(--baseText); }
+.gitmesh-agents-mdxeditor-scope [class*="_iconButton_"]:hover,
+.gitmesh-agents-mdxeditor [class*="_iconButton_"]:hover { color: var(--baseTextContrast); }
+.gitmesh-agents-mdxeditor .mdxeditor-root-contenteditable { min-height: 2.5rem; padding: 0; line-height: 1.6; }
+.gitmesh-agents-mdxeditor [class*="_contentEditable_"] { padding: 0.5rem 0.75rem !important; }
+.gitmesh-agents-mdxeditor--borderless [class*="_contentEditable_"] { padding: 0 !important; }
+.gitmesh-agents-mdxeditor [class*="_placeholder_"] { font-family: inherit; font-size: 0.875rem; line-height: 1.6; color: var(--muted-foreground); }
+.gitmesh-agents-mdxeditor-content { font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; }
+.gitmesh-agents-mdxeditor-content > *:first-child { margin-top: 0; }
+.gitmesh-agents-mdxeditor-content > *:last-child { margin-bottom: 0; }
+.gitmesh-agents-mdxeditor-content p { margin: 0; line-height: 1.5; }
+.gitmesh-agents-mdxeditor-content p + p { margin-top: 0.75rem; }
+.gitmesh-agents-mdxeditor-content a.gitmesh-agents-project-mention-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem; margin: 0 0.15rem; padding: 0.1rem 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--verdict-attested) 25%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--verdict-attested) 5%, transparent);
+  font-size: 0.75rem; line-height: 1.3; text-decoration: none; vertical-align: baseline; white-space: nowrap; user-select: none;
+}
+.gitmesh-agents-mdxeditor-content ul, .gitmesh-agents-mdxeditor-content ol { margin: 0.4rem 0; padding-left: 1.2rem; }
+.gitmesh-agents-mdxeditor-content ul { list-style: disc; }
+.gitmesh-agents-mdxeditor-content ol { list-style: decimal; }
+.gitmesh-agents-mdxeditor-content li { display: list-item; margin: 0.2rem 0; line-height: 1.5; }
+.gitmesh-agents-mdxeditor-content li::marker { color: var(--verdict-attested); }
+.gitmesh-agents-mdxeditor-content h1, .gitmesh-agents-mdxeditor-content h2, .gitmesh-agents-mdxeditor-content h3 { margin: 0.5rem 0 0.3rem; line-height: 1.3; }
+.gitmesh-agents-mdxeditor-content img { max-height: 18rem; border-radius: var(--radius); }
+.gitmesh-agents-mdxeditor-content blockquote { margin: 0.5rem 0; padding-left: 0.75rem; border-left: 3px solid var(--verdict-attested); color: var(--muted-foreground); line-height: 1.5; }
+.gitmesh-agents-mdxeditor-content code { font-family: var(--font-mono); font-size: 0.84em; }
+.gitmesh-agents-mdxeditor-content pre { margin: 0.5rem 0; padding: 0.5rem 0.6rem; border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in oklab, var(--verdict-attested) 4%, var(--background)); overflow-x: auto; }
+
+.prose pre { border: 1px solid var(--border); border-radius: var(--radius); background-color: color-mix(in oklab, var(--verdict-attested) 4%, var(--background)); color: var(--foreground); }
+.prose code { font-family: var(--font-mono); font-size: 0.84em; }
+.prose code::before, .prose code::after { content: none; }
+.prose :not(pre) > code {
+  background-color: color-mix(in oklab, var(--verdict-attested) 8%, var(--accent));
+  padding: 0.15em 0.35em; border-radius: var(--radius-sm); font-weight: 500;
+}
+
+.gitmesh-agents-mermaid {
+  margin: 0.5rem 0; padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background-color: color-mix(in oklab, var(--verdict-attested) 3%, var(--background));
+  overflow-x: auto;
+}
+.gitmesh-agents-mermaid svg { display: block; width: max-content; max-width: none; min-width: 100%; height: auto; }
+.gitmesh-agents-mermaid-status { margin: 0 0 0.45rem; font-size: 0.75rem; color: var(--muted-foreground); }
+.gitmesh-agents-mermaid-status-error { color: var(--destructive); }
+.gitmesh-agents-mermaid-source { margin: 0; padding: 0; border: 0; background: transparent; }
+
+a.gitmesh-agents-project-mention-chip {
+  display: inline-flex; align-items: center; gap: 0.25rem; margin: 0 0.15rem; padding: 0.1rem 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--verdict-attested) 25%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--verdict-attested) 5%, transparent);
+  font-size: 0.75rem; line-height: 1.3; text-decoration: none; vertical-align: baseline; white-space: nowrap;
+}
+
+.gitmesh-agents-mdxeditor-scope [class*="_dialogOverlay_"],
+.gitmesh-agents-mdxeditor [class*="_dialogOverlay_"] { z-index: 80; }
+.gitmesh-agents-mdxeditor-scope [class*="_dialogContent_"],
+.gitmesh-agents-mdxeditor-scope [class*="_largeDialogContent_"],
+.gitmesh-agents-mdxeditor-scope [class*="_popoverContent_"],
+.gitmesh-agents-mdxeditor-scope [class*="_linkDialogPopoverContent_"],
+.gitmesh-agents-mdxeditor-scope [class*="_tableColumnEditorPopoverContent_"],
+.gitmesh-agents-mdxeditor-scope [class*="_toolbarButtonDropdownContainer_"],
+.gitmesh-agents-mdxeditor-scope [class*="_toolbarNodeKindSelectContainer_"],
+.gitmesh-agents-mdxeditor [class*="_dialogContent_"],
+.gitmesh-agents-mdxeditor [class*="_largeDialogContent_"],
+.gitmesh-agents-mdxeditor [class*="_popoverContent_"],
+.gitmesh-agents-mdxeditor [class*="_linkDialogPopoverContent_"],
+.gitmesh-agents-mdxeditor [class*="_tableColumnEditorPopoverContent_"],
+.gitmesh-agents-mdxeditor [class*="_toolbarButtonDropdownContainer_"],
+.gitmesh-agents-mdxeditor [class*="_toolbarNodeKindSelectContainer_"] { z-index: 81 !important; }

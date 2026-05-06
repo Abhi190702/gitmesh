@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX "ix_organizations_tenantId_website_not_null" ON organizations (website, "tenantId") WHERE website IS NOT NULL;

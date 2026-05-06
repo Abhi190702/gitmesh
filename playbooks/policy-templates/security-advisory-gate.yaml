@@ -1,0 +1,29 @@
+metadata:
+  slug: security-advisory-gate
+  title: Security-advisory gate
+  whatItDoes: Routes any action that touches SECURITY.md or publishes a security advisory through human approval.
+  whatItProtects: Your security communications. A miscommunicated CVE is worse than a delayed one.
+  whenToUse: Always. Security communications must be reviewed by a human regardless of how confident the agent is.
+  auditExample: |
+    Agent "security-bot" attempted to publish advisory GHSA-xxxx
+    → require_approval by policy `_starter_security-advisory-gate` v1
+    → operator @security-lead approved 2 hours later
+  videoUrl: null
+  defaultEnabled: true
+policy:
+  name: _starter_security-advisory-gate
+  description: Require approval for security advisory publication or SECURITY.md edits
+  actionPattern:
+    - "publish_advisory"
+    - "edit_security_md"
+    - "file_edit"
+  conditions:
+    pathGlob:
+      - "SECURITY.md"
+      - ".github/SECURITY.md"
+      - "docs/security/**"
+  effect: require_approval
+  effectConfig:
+    approverRoles: ["security", "admin"]
+    timeout: "48h"
+  priority: 15

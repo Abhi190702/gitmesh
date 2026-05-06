@@ -1,8 +1,0 @@
-ARG BASE_IMAGE=gitmesh-node-base:latest
-FROM ${BASE_IMAGE}
-
-COPY ./services/apps/automations_worker/package.json ./services/apps/automations_worker/pnpm-lock.yaml ./services/apps/automations_worker/tsconfig.json  ./services/apps/automations_worker/
-# COPY ./services/apps/automations_worker/config ./services/apps/automations_worker/config
-COPY ./services/apps/automations_worker/src ./services/apps/automations_worker/src
-
-RUN cd services/apps/automations_worker && pnpm install --frozen-lockfile

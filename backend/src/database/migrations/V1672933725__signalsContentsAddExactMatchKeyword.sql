@@ -1,1 +1,0 @@
-ALTER TABLE public."signalsContents" ADD COLUMN "exactKeywords" TEXT[];

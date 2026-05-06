@@ -1,0 +1,27 @@
+metadata:
+  slug: release-approval-gate
+  title: Release approval gate
+  whatItDoes: Routes any release-publish or tag-push by a release agent through human approval.
+  whatItProtects: Your release cadence. Releases are the most public thing your project does.
+  whenToUse: Always when you have a release-role agent. Release-role agents should never publish autonomously.
+  auditExample: |
+    Agent "release-bot" (role=release) attempted publish_release v0.4.0
+    → require_approval by policy `_starter_release-approval-gate` v1
+    → operator @release-captain approved
+  videoUrl: null
+  defaultEnabled: true
+policy:
+  name: _starter_release-approval-gate
+  description: Release-role agents need human approval to publish releases or push tags
+  actionPattern:
+    - "publish_release"
+    - "push_tag"
+    - "create_release"
+  conditions:
+    agentRole:
+      - "release"
+  effect: require_approval
+  effectConfig:
+    approverRoles: ["maintainer", "admin"]
+    timeout: "24h"
+  priority: 12
