@@ -212,56 +212,6 @@ Read our detailed [Contributing Guide](CONTRIBUTING.md) for best practices and g
   </tr>
 </table>
 
----
-
-## Connect With the Community
-
-<div align="center">
-
-[![Join Discord](https://img.shields.io/badge/Join%20us%20on-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/xXvYkK3yEp)
-
-</div>
-
-Choose your preferred channel based on your needs:
-
-| Channel | Response Time | Ideal For |
-|---------|--------------|-----------|
-| [Discord](https://discord.gg/xXvYkK3yEp) | Real-time | Immediate help, community discussions, pair debugging |
-| [GitHub Issues](https://github.com/LF-Decentralized-Trust-labs/gitmesh/issues) | 1–3 days | Bug reports, feature proposals, technical feedback |
-| [Email Support](mailto:gitmesh.oss@gmail.com) | 24–48 hours | Complex technical issues, detailed investigations |
-| [Twitter / X](https://x.com/gitmesh_oss) | Variable | Project updates, community highlights, quick mentions |
-
----
-
-## Project Vitals
-
-<div align="center">
-
-| Metric | Status |
-|--------|--------|
-| **Commit Activity** | ![Commits](https://img.shields.io/github/commit-activity/t/LF-Decentralized-Trust-labs/gitmesh) |
-| **Active Pull Requests** | ![PRs](https://img.shields.io/github/issues-pr/LF-Decentralized-Trust-labs/gitmesh) |
-| **Resolved Issues** | ![Issues](https://img.shields.io/github/issues-closed/LF-Decentralized-Trust-labs/gitmesh) |
-| **Current Release** | ![Release](https://img.shields.io/github/v/release/LF-Decentralized-Trust-labs/gitmesh) |
-
-</div>
-
-### Growth Trajectory
-
-<div align="center">
-
-<a href="https://www.star-history.com/#LF-Decentralized-Trust-labs/gitmesh&Date">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=LF-Decentralized-Trust-labs/gitmesh&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=LF-Decentralized-Trust-labs/gitmesh&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=LF-Decentralized-Trust-labs/gitmesh&type=Date" width="700" />
-  </picture>
-</a>
-
-</div>
-
----
-
 ## License
 
 Licensed under the **Apache License 2.0**. See the [`LICENSE`](LICENSE) file in this repository for the full text.
