@@ -14,78 +14,127 @@ This guide walks you through three methods to get GitMesh Agents running: **Loca
 
 ## Method 1: Local Development (Recommended for Developers)
 
-Best for local development, debugging, and code changes.
+Best for hacking on GitMesh itself: reproducible installs, `.env` creation, workspace build.
 
 ### Requirements
-- Node.js 20+ ([download](https://nodejs.org))
-- pnpm 9+ (install with `npm install -g pnpm`)
 
-### Steps
+- **Node.js 20+** ([download](https://nodejs.org))
+- **pnpm** is not strictly required upfront: `scripts/setup.mjs` will try **Corepack** (`pnpm@9.15.4`) if `pnpm` is missing
 
-1. **Clone and enter the repo:**
-   ```bash
-   git clone https://github.com/LF-Decentralized-Trust-labs/gitmesh.git
-   cd gitmesh
-   ```
+### Recommended: one-command setup (cross-platform)
 
-2. **Install dependencies:**
-   ```bash
-   pnpm install
-   ```
+From the **repository root**, after cloning:
 
-3. **Reset database (first time only):**
-   ```bash
-   rm -rf ~/.gitmesh-agents/instances/default/db
-   ```
+| Platform       | Command        |
+|----------------|----------------|
+| macOS / Linux  | `./setup.sh`   |
+| Windows (PS)   | `.\setup.ps1` |
+| Windows (cmd)  | `setup.cmd`    |
 
-4. **Start the development server:**
-   ```bash
-   pnpm dev
-   ```
+These wrap **`node scripts/setup.mjs`** from the repo root (`setup.mjs` resolves paths from its own location), which will:
 
-   Or use the one-command bootstrap (includes auto-setup):
-   ```bash
-   pnpm gitmesh-agents run
-   ```
+1. Verify Node 20+
+2. Ensure **pnpm** (via Corepack if needed)
+3. Copy **`.env.example` → `.env`** when `.env` is missing
+4. Optionally start **Docker Postgres** on **localhost:5433** (`--with-docker-db`)
+5. Run **`pnpm install --no-frozen-lockfile`** and **`pnpm build`**
+6. With **`--start`**, also runs **`pnpm dev`**
 
-5. **Access the application:**
-   - Open `http://localhost:3100` in your browser
-   - API available at `http://localhost:3100/api`
+Examples:
+
+```bash
+node scripts/setup.mjs                              # install + build only
+node scripts/setup.mjs --start                      # then start dev automatically
+node scripts/setup.mjs --with-docker-db             # also: docker compose -f docker-compose.dev.yml up -d
+node scripts/setup.mjs --skip-build                 # deps only (unusual)
+```
+
+After setup finishes (without `--start`):
+
+```bash
+pnpm dev
+```
+
+### Alternative: manual install (advanced)
+
+Equivalent to skipping the wrappers but matching what CI/script expect on a **fresh clone**:
+
+```bash
+git clone https://github.com/LF-Decentralized-Trust-labs/gitmesh.git
+cd gitmesh
+cp .env.example .env                     # optional; omit if .env exists
+pnpm install --no-frozen-lockfile       # matches scripts/setup.mjs — avoids lockfile churn on first clone
+pnpm build
+pnpm dev
+```
+
+### Database modes (important)
+
+Choose **one** model for local dev:
+
+| Mode | What to do |
+|------|-------------|
+| **Embedded PostgreSQL (default)** | Leave **`DATABASE_URL` unset** or commented in `.env`. Data lives under **`~/.gitmesh-agents/instances/default/db/`** (overridable with **`GITMESH_HOME`** / **`GITMESH_INSTANCE_ID`**). No Docker required. |
+| **Docker Postgres (`docker-compose.dev.yml`)** | Run **`pnpm db:up`** or **`node scripts/setup.mjs --with-docker-db`**, then set **`DATABASE_URL=postgres://gitmesh:gitmesh@localhost:5433/gitmesh`** in `.env`. Apply migrations after changes: **`DATABASE_URL='postgres://…' pnpm db:migrate`**. |
+
+Port **5433** is **only for this Docker Postgres stack**, not for embedded mode. Detail: **`doc/DATABASE.md`**, **`doc/DEVELOPING.md`**.
+
+### Start development
+
+```bash
+pnpm dev
+```
+
+- **Default:** API + bundled UI middleware on **`http://localhost:3100`** (**`/api`** and UI same origin).
+
+**Optional operator UX (recommended after scripted setup):**
+
+```bash
+pnpm gitmesh-agents run        # onboarding / checks / start helper (wizard)
+pnpm gitmesh-agents doctor     # diagnostics; `--repair` for auto-fix attempts
+```
 
 **Verification:**
+
 ```bash
 curl http://localhost:3100/api/health
 ```
 
-### Development Commands
+### Development commands
 
 ```bash
-pnpm dev                    # API + UI in watch mode
-pnpm dev:once              # single run, no file watching
-pnpm dev:server            # only API server
-pnpm dev:ui                # only UI (port 3100)
-pnpm -r typecheck          # type checking
-pnpm test:run              # run all tests
-pnpm build                 # production build
+pnpm dev                       # API + UI (single origin, PORT from .env, default 3100)
+pnpm dev:once                  # single run, no file watching
+pnpm dev:server                # API only (@gitmesh/server)
+pnpm dev:ui                    # Vite UI only → http://localhost:5173 (proxies /api → API PORT, usually 3100)
+
+# Split UI/API: dev:server in one terminal, dev:ui in another.
+pnpm db:up                     # Docker Postgres via docker-compose.dev.yml (5433)
+pnpm db:down                   # stop compose DB
+pnpm -r typecheck              # typecheck all packages
+pnpm test:run                  # Vitest suite
+pnpm build                     # production build (all packages)
+pnpm gitmesh-agents --help     # CLI subcommands (project, agent, audit, …)
 ```
 
 ### Troubleshooting
 
-**Error: `ECONNREFUSED 127.0.0.1:5433`**
+**Error: `ECONNREFUSED` on PostgreSQL**
+
+- If **`DATABASE_URL`** points at **`localhost:5433`** but Postgres is not running, start **`pnpm db:up`** or clear **`DATABASE_URL`** to use embedded DB.
+- If **embedded DB** corrupts / locked: stop **`pnpm dev`**, remove **`~/.gitmesh-agents/instances/default/db`**, restart (data loss for local dev DB only).
+
+**Error: Missing module `@gitmesh/*`**
+
 ```bash
-# Embedded PostgreSQL will auto-start. If you see connection errors:
-rm -rf ~/.gitmesh-agents/instances/default/db
-unset DATABASE_URL
+pnpm install --no-frozen-lockfile
+pnpm build
 pnpm dev
 ```
 
-**Error: Missing module `@gitmesh/adapter-sdk`**
-```bash
-# Rebuild dependencies
-pnpm install --no-frozen-lockfile
-pnpm -r build
-pnpm dev
-```
+**Change HTTP port locally**
+
+Set **`PORT`** in **`.env`** (default **`3100`**) — used by **`pnpm dev`**. **`pnpm dev:ui`** expects the API reachable at that **`PORT`** for **`/api` proxy**.
 
 ---
 
@@ -259,12 +308,18 @@ docker run ... -e ANTHROPIC_API_KEY=... -e OPENAI_API_KEY=... ...
 
 ### 3. Configure Agents
 
-In the UI or via CLI:
+Create and manage agents from the **operator UI** at **`http://localhost:3100`** once a project exists, or use the **HTTP API**.
+
+**CLI:** the `agent` namespace today supports **`list`**, **`get`**, and **`local-cli`** — not `create`. Inspect help:
+
 ```bash
-pnpm gitmesh-agents agent create \
-  --project-id <id> \
-  --name "Issue Triage" \
-  --role triage
+pnpm gitmesh-agents agent --help
+```
+
+For **local adapter / API key + playbooks**:
+
+```bash
+pnpm gitmesh-agents agent local-cli <agentRef> -P <project-id>
 ```
 
 ---
@@ -276,15 +331,16 @@ pnpm gitmesh-agents agent create \
 curl http://localhost:3100/api/health
 ```
 
-Expected response:
+Expected response (shape may include extra fields):
+
 ```json
 {"status":"ok"}
 ```
 
-**List projects:**
-```bash
-curl http://localhost:3100/api/projects
-```
+**Projects / other API:**
+
+- In **`local_trusted`** (default local dev), listing projects may succeed without credentials depending on middleware.
+- In **`authenticated`** / **`GITMESH_DEPLOYMENT_MODE=authenticated`** (Docker quickstart builds this pattern), **`/api/projects`** expects a session or bearer token — use the UI or **`pnpm gitmesh-agents project --help`** for client flows rather than naive `curl` alone.
 
 ---
 
@@ -321,10 +377,11 @@ docker exec -it gitmesh-agents bash
 
 **Local Dev:**
 ```bash
-# Kill process on port 3100
-lsof -ti:3100 | xargs kill -9
+# Optional: kill process listening on PORT (here 3100)
+lsof -ti:3100 | xargs kill -9       # Unix
 
-# Or use a different port (requires code change)
+# Prefer setting PORT in .env rather than patching code:
+# PORT=3200 (then restart `pnpm dev`)
 ```
 
 **Docker:**
@@ -382,7 +439,7 @@ docker build --no-cache -t gitmesh-agents-local .
 ## Support
 
 - **Issues:** [GitHub Issues](https://github.com/LF-Decentralized-Trust-labs/gitmesh/issues)
-- **Docs:** [doc/](doc/) directory
+- **Docs:** [doc/](doc/) directory (engineering) and **`docs/`** ([Mintlify](https://mintlify.com/) site via `pnpm docs:dev`)
 - **Developing:** [doc/DEVELOPING.md](doc/DEVELOPING.md)
 - **Database:** [doc/DATABASE.md](doc/DATABASE.md)
 
