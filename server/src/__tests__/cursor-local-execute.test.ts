@@ -9,18 +9,34 @@ async function writeFakeCursorCommand(
   capturePath: string,
 ): Promise<void> {
   if (process.platform === "win32") {
+    // Windows .cmd script — read stdin as plain text (the prompt),
     await fs.writeFile(
       commandPath,
       `@echo off
-node -e "const fs=require('fs');fs.writeFileSync(process.argv[1], JSON.stringify({ argv: process.argv.slice(2), env: process.env }, null, 2));" "${capturePath}" %*
-exit /b 0
+set GITMESH_TEST_CAPTURE_PATH=${capturePath.replace(/\\/g, "\\\\")}
+node -e "const fs=require('fs');let stdin='';process.stdin.on('data',d=>stdin+=d);process.stdin.on('end',()=>{const prompt=stdin;const gitmeshAgentsEnvKeys=Object.keys(process.env).filter(k=>k.startsWith('GITMESH_')).sort();const payload={prompt,gitmeshAgentsEnvKeys};const p=process.env.GITMESH_TEST_CAPTURE_PATH;if(p){fs.writeFileSync(p,JSON.stringify(payload,null,2));}});" %*
 `,
+      { mode: 0o755 },
     );
   } else {
+    // Unix shell script — same logic, but readable multi-line Node script.
     await fs.writeFile(
       commandPath,
-      `#!/bin/sh
-node -e 'const fs=require("fs");fs.writeFileSync(process.argv[1], JSON.stringify({ argv: process.argv.slice(2), env: process.env }, null, 2));' "${capturePath}" "$@"
+      `#!/usr/bin/env node
+const fs = require('fs');
+let stdin = '';
+process.stdin.on('data', (chunk) => { stdin += chunk; });
+process.stdin.on('end', () => {
+  const prompt = stdin;
+  const gitmeshAgentsEnvKeys = Object.keys(process.env)
+    .filter((k) => k.startsWith('GITMESH_'))
+    .sort();
+  const payload = { prompt, gitmeshAgentsEnvKeys };
+  const capturePath = process.env.GITMESH_TEST_CAPTURE_PATH;
+  if (capturePath) {
+    fs.writeFileSync(capturePath, JSON.stringify(payload, null, 2));
+  }
+});
 `,
       { mode: 0o755 },
     );
@@ -43,7 +59,7 @@ describe("cursor execute", () => {
     );
     const capturePath = path.join(root, "capture.json");
     await fs.mkdir(workspace, { recursive: true });
-    await writeFakeCursorCommand(commandPath);
+    await writeFakeCursorCommand(commandPath, capturePath);
 
     const previousHome = process.env.HOME;
     process.env.HOME = root;
@@ -115,10 +131,13 @@ describe("cursor execute", () => {
   it("passes --mode when explicitly configured", async () => {
     const root = await fs.mkdtemp(path.join(os.tmpdir(), "gitmesh-agents-cursor-execute-mode-"));
     const workspace = path.join(root, "workspace");
-    const commandPath = path.join(root, "agent");
+    const commandPath = path.join(
+      root,
+      process.platform === "win32" ? "agent.cmd" : "agent",
+    );
     const capturePath = path.join(root, "capture.json");
     await fs.mkdir(workspace, { recursive: true });
-    await writeFakeCursorCommand(commandPath);
+    await writeFakeCursorCommand(commandPath, capturePath);
 
     const previousHome = process.env.HOME;
     process.env.HOME = root;
