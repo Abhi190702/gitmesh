@@ -54,7 +54,7 @@ process.stdin.on("end", () => {
     await fs.writeFile(
       commandPath,
       `@echo off
-set GITMESH_TEST_CAPTURE_PATH=${capturePath.replace(/\\/g, "\\\\")}
+set "GITMESH_TEST_CAPTURE_PATH=${capturePath}"
 node "%~dp0agent" %*
 `,
       "utf8",
