@@ -8,38 +8,59 @@ async function writeFakeCursorCommand(
   commandPath: string,
   capturePath: string,
 ): Promise<void> {
+  const nodeScript = `#!/usr/bin/env node
+const fs = require("node:fs");
+
+let stdin = "";
+process.stdin.on("data", (chunk) => {
+  stdin += chunk;
+});
+
+process.stdin.on("end", () => {
+  const capturePath = process.env.GITMESH_TEST_CAPTURE_PATH;
+  const payload = {
+    argv: process.argv.slice(2),
+    prompt: stdin,
+    gitmeshAgentsEnvKeys: Object.keys(process.env)
+      .filter((key) => key.startsWith("GITMESH_"))
+      .sort(),
+  };
+  if (capturePath) {
+    fs.writeFileSync(capturePath, JSON.stringify(payload, null, 2), "utf8");
+  }
+  console.log(JSON.stringify({
+    type: "system",
+    subtype: "init",
+    session_id: "cursor-session-1",
+    model: "auto",
+  }));
+  console.log(JSON.stringify({
+    type: "assistant",
+    message: { content: [{ type: "output_text", text: "hello" }] },
+  }));
+  console.log(JSON.stringify({
+    type: "result",
+    subtype: "success",
+    session_id: "cursor-session-1",
+    result: "ok",
+  }));
+});
+`;
+
   if (process.platform === "win32") {
-    // Windows .cmd script — read stdin as plain text (the prompt),
+    const dir = path.dirname(commandPath);
+    const scriptPath = path.join(dir, "agent");
+    await fs.writeFile(scriptPath, nodeScript, "utf8");
     await fs.writeFile(
       commandPath,
       `@echo off
 set GITMESH_TEST_CAPTURE_PATH=${capturePath.replace(/\\/g, "\\\\")}
-node -e "const fs=require('fs');let stdin='';process.stdin.on('data',d=>stdin+=d);process.stdin.on('end',()=>{const prompt=stdin;const gitmeshAgentsEnvKeys=Object.keys(process.env).filter(k=>k.startsWith('GITMESH_')).sort();const payload={prompt,gitmeshAgentsEnvKeys};const p=process.env.GITMESH_TEST_CAPTURE_PATH;if(p){fs.writeFileSync(p,JSON.stringify(payload,null,2));}});" %*
+node "%~dp0agent" %*
 `,
-      { mode: 0o755 },
+      "utf8",
     );
   } else {
-    // Unix shell script — same logic, but readable multi-line Node script.
-    await fs.writeFile(
-      commandPath,
-      `#!/usr/bin/env node
-const fs = require('fs');
-let stdin = '';
-process.stdin.on('data', (chunk) => { stdin += chunk; });
-process.stdin.on('end', () => {
-  const prompt = stdin;
-  const gitmeshAgentsEnvKeys = Object.keys(process.env)
-    .filter((k) => k.startsWith('GITMESH_'))
-    .sort();
-  const payload = { prompt, gitmeshAgentsEnvKeys };
-  const capturePath = process.env.GITMESH_TEST_CAPTURE_PATH;
-  if (capturePath) {
-    fs.writeFileSync(capturePath, JSON.stringify(payload, null, 2));
-  }
-});
-`,
-      { mode: 0o755 },
-    );
+    await fs.writeFile(commandPath, nodeScript, { encoding: "utf8", mode: 0o755 });
   }
 }
 
