@@ -3,7 +3,7 @@ import type { Command } from "commander";
 import { createProgram, type CliMode } from "../program.js";
 import { registerLegacyCommands } from "../legacy.js";
 
-const STUB_NAMES = ["apply", "check", "doctor", "init", "migrate", "policy"];
+const STUB_NAMES = ["apply", "check", "init", "migrate", "policy"];
 
 function makeHarness(mode: CliMode, { legacy = true }: { legacy?: boolean } = {}) {
   let out = "";
@@ -45,7 +45,7 @@ afterEach(() => {
 describe("createProgram (gitmesh mode)", () => {
   it("exposes exactly the new command tree at top level", () => {
     const { program } = makeHarness("gitmesh");
-    expect(commandNames(program)).toEqual([...STUB_NAMES, "legacy"].sort());
+    expect(commandNames(program)).toEqual([...STUB_NAMES, "doctor", "legacy"].sort());
   });
 
   it("moves every gitmesh-agents command under the legacy group", () => {
@@ -77,9 +77,13 @@ describe("createProgram (gitmesh mode)", () => {
     const { program } = makeHarness("gitmesh");
     const help = program.helpInformation();
     expect(help).toContain("Usage: gitmesh");
-    for (const name of [...STUB_NAMES, "legacy"]) {
+    for (const name of [...STUB_NAMES, "doctor", "legacy"]) {
       expect(help).toContain(name);
     }
+    // doctor is the one implemented command: its description must not carry
+    // the stubs' "(not implemented yet)" suffix.
+    expect(help).toContain("Audit agent configuration across coding agents");
+    expect(help).not.toMatch(/doctor.*not implemented yet/);
   });
 
   it("renders legacy group help with legacy commands", () => {
@@ -99,7 +103,7 @@ describe("createProgram (gitmesh mode)", () => {
 describe("createProgram (gitmesh mode, published package: no legacy registrar)", () => {
   it("still lists legacy in help", () => {
     const { program } = makeHarness("gitmesh", { legacy: false });
-    expect(commandNames(program)).toEqual([...STUB_NAMES, "legacy"].sort());
+    expect(commandNames(program)).toEqual([...STUB_NAMES, "doctor", "legacy"].sort());
   });
 
   it("legacy invocations exit 1 with install guidance instead of running", async () => {
@@ -119,5 +123,13 @@ describe("createProgram (gitmesh-agents mode)", () => {
     expect(help).toContain("setup");
     expect(commandNames(program)).not.toContain("legacy");
     expect(commandNames(program)).not.toContain("apply");
+    // `registerDoctorCommand` is called two lines below the gitmesh-agents
+    // early return in program.ts; hoisting it would silently add the new
+    // product surface to this frozen one. The name alone proves nothing --
+    // the legacy tree has always had its own `doctor` health check -- so this
+    // pins which of the two is mounted here.
+    expect(program.commands.find((c) => c.name() === "doctor")?.description()).toBe(
+      "Run diagnostic checks on your GitMesh Agents setup",
+    );
   });
 });
